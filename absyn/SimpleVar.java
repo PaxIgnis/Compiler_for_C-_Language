@@ -1,10 +1,12 @@
 package absyn;
 
-public class NilExp extends Exp {
+public class SimpleVar extends Absyn {
+    public String name;
 
-    public NilExp(int row, int col) {
+    public SimpleVar(int row, int col, String name) {
         this.row = row;
         this.col = col;
+        this.name = name;
     }
 
     public void accept(AbsynVisitor visitor, int level) {

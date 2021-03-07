@@ -1,13 +1,16 @@
 package absyn;
 
-public class NilExp extends Exp {
+public class ReturnExp extends Exp {
+    public Exp exp;
 
-    public NilExp(int row, int col) {
+    public ReturnExp(int row, int col, Exp exp) {
         this.row = row;
         this.col = col;
+        this.exp = exp;
     }
 
     public void accept(AbsynVisitor visitor, int level) {
         visitor.visit(this, level);
     }
+
 }

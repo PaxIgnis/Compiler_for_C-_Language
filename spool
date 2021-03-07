@@ -1,0 +1,28 @@
+Script started on 2021-03-06 16:03:41-0500
+[94m|[m[35m16:03:41[m[94m|[m[32m q[m[94m @ [m[32mQ[m [93m/mnt/d/Users/Hendrik/New folder (5)/University/Second Year/OneDrive - University of Guelph/Fifth Year/CIIS4650/Assignments/Assignment 2 (Checkpoint 1)/CIS4650A2[m [96m(master ?)[m [91m$[m make
+#java -cp ./projects/java-cup-11b.jar:. java_cup.Main -dump -expect 3 tiny.cup
+java -cp ./projects/java-cup-11b.jar:. java_cup.Main -expect 3 tiny.cup
+Warning : Terminal "ERROR" was declared but never used
+Warning : *** Shift/Reduce conflict found in state #82
+  between selec_stmt ::= IF LPAREN exp RPAREN stmt (*) 
+  and     selec_stmt ::= IF LPAREN exp RPAREN stmt (*) ELSE stmt 
+  under symbol ELSE
+  Resolved in favor of shifting.
+
+------- CUP v0.11b 20160615 (GIT 4ac7450) Parser Generation Summary -------
+  0 errors and 2 warnings
+  30 terminals, 19 non-terminals, and 53 productions declared, 
+  producing 99 unique parse states.
+  1 terminal declared but not used.
+  0 non-terminal declared but not used.
+  0 productions never reduced.
+  1 conflict detected (3 expected).
+  Code written to "parser.java", and "sym.java".
+---------------------------------------------------- (CUP v0.11b 20160615 (GIT 4ac7450))
+javac -cp ./projects/java-cup-11b.jar:. Main.java absyn/Absyn.java absyn/ReadExp.java absyn/RepeatExp.java absyn/OpExp.java absyn/VarExp.java absyn/ExpList.java absyn/Exp.java absyn/WriteExp.java absyn/IntExp.java absyn/AssignExp.java absyn/IfExp.java absyn/AbsynVisitor.java parser.java sym.java Lexer.java ShowTreeVisitor.java Scanner.java
+Note: Main.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+[94m|[m[35m16:03:48[m[94m|[m[32m q[m[94m @ [m[32mQ[m [93m/mnt/d/Users/Hendrik/New folder (5)/University/Second Year/OneDrive - University of Guelph/Fifth Year/CIIS4650/Assignments/Assignment 2 (Checkpoint 1)/CIS4650A2[m [96m(master ?)[m [91m$[m exit
+exit
+
+Script done on 2021-03-06 16:03:54-0500

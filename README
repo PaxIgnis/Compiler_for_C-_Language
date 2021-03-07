@@ -1,0 +1,23 @@
+A JFlex+Cup implementation for the Tiny language.
+
+  Note that you need to modify the paths for CLASSPATH, JFLEX, and CUP in 
+the Makefile so that the related commands can be found on your particular 
+machine.  For example, the given settings are for the Linux server and the 
+commented settings are for my macbook.
+
+  To build the parser, type "make" in the current directory, which will 
+generate an executable program called "Main".
+
+  To test source code like "fac.tiny", type 
+
+    "java -classpath /usr/share/java/cup.jar:. Main fac.tiny" 
+
+and the syntax tree will be displayed on the screen.
+
+  To rebuild the parser, type "make clean" and type "make" again.
+
+  Also note that all the abstract syntax tree structures are defined under
+the directory "absyn" and the methods for showing a syntax tree is implemented
+by the visitor pattern in "ShowTreeVisitor.java".  Since some java files are 
+generated automatically, they may contain variables that are not used, which 
+are safe to ignore in the compilation process.

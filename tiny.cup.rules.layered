@@ -81,7 +81,7 @@ non terminal program, declar_list, param_list, stmt_list, arg_list;
 
 non terminal declar, var_declar, fun_declar, local_declar;
 non terminal stmt, expr_stmt, selec_stmt, iter_stmt, return_stmt, comp_stmt;
-non terminal exp;
+non terminal exp, var;
 non terminal type_specif, params, param;
 
 precedence nonassoc LT, LTEQ, GT, GTEQ, EQ, EQUALS, NEQUALS;
@@ -159,7 +159,7 @@ return_stmt    ::= RETURN exp SEMI
                   | RETURN SEMI
                   ;
 
-exp            ::= exp EQ exp
+exp            ::= var EQ exp
                   | exp LTEQ exp
                   | exp LT exp
                   | exp GT exp
@@ -171,11 +171,14 @@ exp            ::= exp EQ exp
                   | exp TIMES exp
                   | exp OVER exp
                   | LPAREN exp RPAREN
-                  | ID LBRACK exp RBRACK
                   | ID LPAREN arg_list RPAREN
                   | ID LPAREN RPAREN
-                  | ID
                   | NUM
+                  | var
+                  ;
+
+var            ::= ID
+                  | ID LBRACK exp RBRACK
                   ;
 
 arg_list       ::= arg_list COM exp

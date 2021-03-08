@@ -137,7 +137,8 @@ public class ShowTreeVisitor implements AbsynVisitor {
   public void visit( CallExp exp, int level ) {
     indent( level );
     System.out.println( "CallExp: " + exp.func );
-    exp.args.accept(this, ++level );
+    if (exp.args != null)
+      exp.args.accept(this, ++level ); /* TODO: Might change */
   }
 
   public void visit( WhileExp exp, int level ) {
@@ -158,7 +159,8 @@ public class ShowTreeVisitor implements AbsynVisitor {
     indent( level );
     System.out.println( "CompoundExp: " );
     level++;
-    exp.decs.accept(this, level );
+    if (exp.decs != null)
+      exp.decs.accept(this, level );
     exp.exps.accept(this, level );
   }
 

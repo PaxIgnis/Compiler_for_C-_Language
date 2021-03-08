@@ -78,17 +78,16 @@ terminal ERROR;
 
 
 non terminal DecList program, declar_list;
-non terminal VarDecList param_list, params, local_declar;
+non terminal VarDecList param_list;
 non terminal ExpList stmt_list, arg_list;
 
-
-non terminal Exp stmt, expr_stmt, selec_stmt, iter_stmt, return_stmt;
-non terminal CompoundExp comp_stmt;
+non terminal Exp declar, local_declar;
+non terminal Exp stmt, expr_stmt, selec_stmt, iter_stmt, return_stmt, comp_stmt;
 non terminal Exp exp;
-non terminal Dec declar, fun_declar;
+non terminal Exp type_specif, params;
+non terminal Dec fun_declar;
 non terminal Var var;
 non terminal VarDec var_declar, param;
-non terminal NameTy type_specif;
 
 precedence nonassoc LT, LTEQ, GT, GTEQ, EQ, EQUALS, NEQUALS;
 precedence left PLUS, MINUS;
@@ -122,7 +121,7 @@ declar         ::= var_declar:v
 var_declar     ::= type_specif:t ID:i SEMI
                      {: RESULT = new SimpleDec(tleft, tright, t, i); :}
                   | type_specif:t ID:i LBRACK NUM:n RBRACK SEMI
-                     {: RESULT = new ArrayDec(tleft, tright, t, i, new IntExp(tleft, tright, n)); :}
+                     {: RESULT = new ArrayDec(tleft, tright, t, i, n); :}
                   ;
 
 type_specif    ::= INT:i
@@ -138,7 +137,7 @@ fun_declar     ::= type_specif:t ID:i LPAREN params:p RPAREN comp_stmt:c
 params         ::= param_list:p
                      {: RESULT = p; :}
                   | VOID:v
-                     {: RESULT = new VarDecList(new SimpleDec(vleft, vright, new NameTy(vleft, vright, NameTy.VOID), ""), null); :} /* TODO: or should it be this: {: RESULT = new NilExp(vleft, vright); :} */
+                     {: RESULT = new NameTy(vleft, vright, NameTy.VOID); :} /* TODO: or should it be this: {: RESULT = new NilExp(vleft, vright); :} */
                   ;
 
 param_list     ::= param_list:p1 COM param:p2
@@ -155,7 +154,7 @@ param_list     ::= param_list:p1 COM param:p2
 param          ::= type_specif:t ID:i
                      {: RESULT = new SimpleDec(tleft, tright, t, i); :}
                   | type_specif:t ID:i LBRACK RBRACK
-                     {: RESULT = new ArrayDec(tleft, tright, t, i, new IntExp(tleft, tright, "0")); :}
+                     {: RESULT = new ArrayDec(tleft, tright, t, i, 0); :}
                   ;
 
 comp_stmt      ::= LBRACE local_declar:l stmt_list:s RBRACE
@@ -163,31 +162,22 @@ comp_stmt      ::= LBRACE local_declar:l stmt_list:s RBRACE
                   ;
 
 local_declar   ::= local_declar:l var_declar:v
-                     {: if (l == null) {
-                           RESULT = new VarDecList(v, null);
-                        } else {
-                           VarDecList t = l;
-                           while( t.tail != null )
-                              t = t.tail;
-                           t.tail = new VarDecList(v, null);
-                           RESULT = l;
-                        }
+                     {: VarDecList t = l;
+                        while( t.tail != null )
+                           t = t.tail;
+                        t.tail = new VarDecList(v, null);
+                        RESULT = l;
                      :}
                   |
-                     {: RESULT = null; :} /* TODO: Fix null handling in absyn files
-                                             should this be new VarDecList(null, null)? */
+                     {: RESULT = null; :} /* TODO: Fix null handling in absyn files */
                   ;
 
 stmt_list      ::= stmt_list:s1 stmt:s2
-                     {: if (s1 == null) {
-                           RESULT = new ExpList(s2, null);
-                        } else {
-                           ExpList t = s1;
-                           while( t.tail != null )
-                              t = t.tail;
-                           t.tail = new ExpList(s2, null);
-                           RESULT = s1;
-                        }
+                     {: ExpList t = s1;
+                        while( t.tail != null )
+                           t = t.tail;
+                        t.tail = new ExpList(s2, null);
+                        RESULT = s1;
                      :}
                   |
                      {: RESULT = null; :} /* TODO: Fix null handling in absyn files */
@@ -259,7 +249,7 @@ exp            ::= var:v EQ exp:e
                   | NUM:n
                      {: RESULT = new IntExp(nleft, nright, n); :}
                   | var:v
-                    {: RESULT = new VarExp(vleft, vright, v); :}
+                    {: RESULT = v; :}
                   ;
 
 var            ::= ID:i
@@ -276,5 +266,5 @@ arg_list       ::= arg_list:a COM exp:e
                         RESULT = a;
                      :}
                   | exp:e
-                     {: RESULT = new ExpList(e, null); :}
+                     {: RESULT = e; :}
                   ;

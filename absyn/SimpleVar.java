@@ -1,6 +1,6 @@
 package absyn;
 
-public class SimpleVar extends Absyn {
+public class SimpleVar extends Var {
     public String name;
 
     public SimpleVar(int row, int col, String name) {

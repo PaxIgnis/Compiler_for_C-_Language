@@ -1,0 +1,19 @@
+/* 
+ * This program shows 2 errors, that are recoverable.
+ * The first error is when a paramater does not have a comma
+ * between it an another parameter, and the second error
+ * is when there is a floating negative sign in fornt of the paramater.
+ * For both of these cases the paramaters are skipped and processing continues.
+ */
+
+int gcd(int u, int v) {
+  if (v == 0) return u;
+  else return gcd(v v, u - u/v*v);
+}
+
+void main(void) {
+  int x; int y;
+  x = input();
+  y = input();
+  output(gcd(x, -y));
+}

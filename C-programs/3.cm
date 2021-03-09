@@ -1,0 +1,24 @@
+/* 
+* This program shows 2 errors, that are recoverable.
+* Both of the error are to do with incorrect declarations 
+* for variables. The first error is an incorrectly spelled type,
+* and the second error is a missing type. In both instances the
+* error is flagged, and in order to recover from the error and not 
+* run into more trouble further on due to a missing variable declaration,
+* the variables are assumed to have a type of int.
+*/
+
+int minloc(int a[], int low, int high) {
+  intt i; x; int k;
+  k = low;
+  x = a[low];
+  i = low + 1;
+  while (i < high) {
+    if (a[i] < x) {
+       x = a[i];
+       k = i; 
+    }
+    i = i + 1;
+  } 
+  return k;
+}

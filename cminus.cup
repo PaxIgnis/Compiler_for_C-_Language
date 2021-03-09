@@ -90,6 +90,7 @@ non terminal Var var;
 non terminal VarDec var_declar, param;
 non terminal NameTy type_specif;
 
+precedence left ELSE, COM;
 precedence nonassoc LT, LTEQ, GT, GTEQ, EQ, EQUALS, NEQUALS;
 precedence left PLUS, MINUS;
 precedence left TIMES, OVER;
@@ -103,14 +104,19 @@ program        ::= declar_list:d
                   ;
 
 declar_list    ::= declar_list:d1 declar:d2
-                     {: DecList t = d1;
-                        while ( t.tail != null )
-                           t = t.tail;
-                        t.tail = new DecList(d2, null);
-                        RESULT = d1;
+                     {: if (d1 == null) {
+                           RESULT = new DecList(d2, null);
+                        } else {DecList t = d1;
+                           while ( t.tail != null )
+                              t = t.tail;
+                           t.tail = new DecList(d2, null);
+                           RESULT = d1;
+                        }
                      :}
                   | declar:d
                      {: RESULT = new DecList(d, null); :}
+                  | error:e
+                     {: parser.report_error("Declaration error", e); :}
                   ;
 
 declar         ::= var_declar:v
@@ -123,6 +129,10 @@ var_declar     ::= type_specif:t ID:i SEMI
                      {: RESULT = new SimpleDec(tleft, tright, t, i); :}
                   | type_specif:t ID:i LBRACK NUM:n RBRACK SEMI
                      {: RESULT = new ArrayDec(tleft, tright, t, i, new IntExp(tleft, tright, n)); :}
+                  | error:e ID:i SEMI
+                     {: parser.report_error("Variable Declaration error, invalid type, substituting int", e);
+                        RESULT = new SimpleDec(eleft, eright, new NameTy(eleft, eright, NameTy.INT), i);
+                     :}
                   ;
 
 type_specif    ::= INT:i
@@ -133,20 +143,27 @@ type_specif    ::= INT:i
 
 fun_declar     ::= type_specif:t ID:i LPAREN params:p RPAREN comp_stmt:c
                      {: RESULT = new FunctionDec(tleft, tright, t, i, p, c); :}
+                  | error:e ID:i LPAREN params:p RPAREN comp_stmt:c
+                     {: parser.report_error("Function Declaration error, invalid type, substituting int", e);
+                        RESULT = new FunctionDec(eleft, eright, new NameTy(eleft, eright, NameTy.INT), i, p, c); :}
                   ;
 
 params         ::= param_list:p
                      {: RESULT = p; :}
                   | VOID:v
-                     {: RESULT = new VarDecList(new SimpleDec(vleft, vright, new NameTy(vleft, vright, NameTy.VOID), ""), null); :} /* TODO: or should it be this: {: RESULT = new NilExp(vleft, vright); :} */
+                     {: RESULT = new VarDecList(new SimpleDec(vleft, vright, new NameTy(vleft, vright, NameTy.VOID), ""), null); :}
                   ;
 
 param_list     ::= param_list:p1 COM param:p2
-                     {: VarDecList t = p1;
-                        while( t.tail != null )
-                           t = t.tail;
-                        t.tail = new VarDecList(p2, null);
-                        RESULT = p1;
+                     {: if (p1 == null) {
+                           RESULT = new VarDecList(p2, null);
+                        } else {
+                           VarDecList t = p1;
+                           while( t.tail != null )
+                              t = t.tail;
+                           t.tail = new VarDecList(p2, null);
+                           RESULT = p1;
+                        }
                      :}
                   | param:p
                      {: RESULT = new VarDecList(p, null); :} /* TODO: Put error detection below */
@@ -190,7 +207,7 @@ stmt_list      ::= stmt_list:s1 stmt:s2
                         }
                      :}
                   |
-                     {: RESULT = null; :} /* TODO: Fix null handling in absyn files */
+                     {: RESULT = null; :} 
                   ;
 
 stmt           ::= expr_stmt:e
@@ -228,7 +245,6 @@ return_stmt    ::= RETURN:r exp:e SEMI
                   ;
 
 exp            ::= var:v EQ exp:e
-                     // {: RESULT = new OpExp(e1left, e1right, e1, OpExp.EQ, e2); :}
                      {: RESULT = new AssignExp(vleft, vright, new VarExp(vleft, vright, v), e); :}
                   | exp:e1 LTEQ exp:e2
                      {: RESULT = new OpExp(e1left, e1right, e1, OpExp.LTEQ, e2); :}

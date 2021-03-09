@@ -277,4 +277,14 @@ arg_list       ::= arg_list:a COM exp:e
                      :}
                   | exp:e
                      {: RESULT = new ExpList(e, null); :}
+                  | error COM exp:e
+                     {: parser.report_error("Invalid argument in argument list", null);
+                        RESULT = new ExpList(e, null); 
+                     :}
+                  | arg_list:a COM error
+                     {: parser.report_error("Invalid argument in argument list", null);
+                        RESULT = a; 
+                     :}
+                  | error
+                     {: parser.report_error("Invalid argument in argument list", null); :}
                   ;

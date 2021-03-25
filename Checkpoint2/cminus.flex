@@ -87,6 +87,9 @@ number = {digit}+
    between A and Z, a and z, zero and nine, or an underscore. */
 identifier = [_a-zA-Z][_a-zA-Z0-9]*
 
+/* Comments in block style */
+comment = "/*"( [^*] | (\*+[^*/]) )*\*+\/
+
    
 %%
 /* ------------------------Lexical Rules Section---------------------- */
@@ -126,5 +129,6 @@ identifier = [_a-zA-Z][_a-zA-Z0-9]*
 {number}           { return symbol(sym.NUM, yytext()); }
 {identifier}       { return symbol(sym.ID, yytext()); }
 {WhiteSpace}+      { /* skip whitespace */ }   
-"/*"[^"*/"]*"*/"       { /* skip comments */ }
-.                  { return symbol(sym.ERROR); }
+{comment}          { /* skip comments */ }
+.                  { System.err.println("Syntax Error At Line " + yyline + " Column " + yycolumn + ": " + yytext());
+                     return symbol(sym.ERROR); }

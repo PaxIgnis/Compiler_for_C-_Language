@@ -1,3 +1,18 @@
+Hendrik van der Meijden
+CIS4650 W21
+March, 2020
+
+The program requires jFlex to be installed, and available as a PATH variable. 
+The CUP jar is provided in the submission and does not need to be installed. 
+To make the program just type ‘make’. 
+To test the Scanner use: java -cp projects/java-cup-11b.jar:. Scanner < C-programs/gcd.cm
+To test the parser w/o AST: java -cp projects/java-cup-11b.jar:. CM C-programs/gcd.cm
+To test the parser with AST: java -cp projects/java-cup-11b.jar:. CM -a C-programs/gcd.cm
+(the AST will be in a file: C-programs/gcd.abs)
+
+
+
+
 A JFlex+Cup implementation for the Cplus language.
 
   Note that you need to modify the paths for CLASSPATH, JFLEX, and CUP in 

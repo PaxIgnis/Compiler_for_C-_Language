@@ -41,7 +41,13 @@ public class ShowTreeVisitor implements AbsynVisitor {
     indent( level );
     System.out.println( "IfExp:" );
     level++;
-    exp.test.accept( this, level );
+    if (exp.test != null) {
+      exp.test.accept( this, level );
+    } else {
+      indent( level );
+      System.out.println("Invalid Expresion Statement");
+    }
+    
     exp.thenpart.accept( this, level );
     if (exp.elsepart != null )
        exp.elsepart.accept( this, level );

@@ -53,7 +53,7 @@ parser code {:
    
         /* Print the contents of the StringBuffer 'm', which contains
            an error message, out on a line. */
-        System.err.println(m);
+        System.err.print("\n" + m + "\n\t");
     }
    
     /* Change the method report_fatal_error so when it reports a fatal
@@ -133,6 +133,10 @@ var_declar     ::= type_specif:t ID:i SEMI
                      {: parser.report_error("Variable Declaration error, invalid type, substituting int", e);
                         RESULT = new SimpleDec(eleft, eright, new NameTy(eleft, eright, NameTy.INT), i);
                      :}
+                  | type_specif:t ID:i error:e SEMI
+                     {: parser.report_error("Variable Declaration error", e);
+                        RESULT = new SimpleDec(eleft, eright, new NameTy(eleft, eright, NameTy.INT), i);
+                     :}
                   ;
 
 type_specif    ::= INT:i
@@ -146,6 +150,11 @@ fun_declar     ::= type_specif:t ID:i LPAREN params:p RPAREN comp_stmt:c
                   | error:e ID:i LPAREN params:p RPAREN comp_stmt:c
                      {: parser.report_error("Function Declaration error, invalid type, substituting int", e);
                         RESULT = new FunctionDec(eleft, eright, new NameTy(eleft, eright, NameTy.INT), i, p, c); :}
+                  | type_specif:t ID:i LPAREN params:p RPAREN SEMI
+                     {: RESULT = new FunctionDec(tleft, tright, t, i, p, null); :}
+                  | error:e ID:i LPAREN params:p RPAREN SEMI
+                     {: parser.report_error("Function Declaration error, invalid type, substituting int", e);
+                        RESULT = new FunctionDec(eleft, eright, new NameTy(eleft, eright, NameTy.INT), i, p, null); :}
                   ;
 
 params         ::= param_list:p
@@ -232,6 +241,12 @@ selec_stmt     ::= IF:i LPAREN exp:e RPAREN stmt:s
                      {: RESULT = new IfExp(ileft, iright, e, s, null); :}
                   | IF:i LPAREN exp:e RPAREN stmt:s1 ELSE stmt:s2
                      {: RESULT = new IfExp(ileft, iright, e, s1, s2); :}
+                  | IF:i LPAREN error:e RPAREN stmt:s
+                     {: parser.report_error("Invalid syntax in if expression Selection Statement.", e);
+                        RESULT = new IfExp(eleft, eright, null, s, null); :}
+                  | IF:i LPAREN error:e RPAREN stmt:s1 ELSE stmt:s2
+                     {: parser.report_error("Invalid syntax in if expression Selection Statement.", e);
+                        RESULT = new IfExp(eleft, eright, null, s1, s2); :}
                   ;
 
 iter_stmt      ::= WHILE:w LPAREN exp:e RPAREN stmt:s
@@ -293,14 +308,14 @@ arg_list       ::= arg_list:a COM exp:e
                      :}
                   | exp:e
                      {: RESULT = new ExpList(e, null); :}
-                  | error COM exp:e
-                     {: parser.report_error("Invalid argument in argument list", null);
-                        RESULT = new ExpList(e, null); 
+                  | error:e COM exp:e1
+                     {: parser.report_error("Invalid argument in argument list0", e);
+                        RESULT = new ExpList(e1, null); 
                      :}
-                  | arg_list:a COM error
-                     {: parser.report_error("Invalid argument in argument list", null);
+                  | arg_list:a COM error:e
+                     {: parser.report_error("Invalid argument in argument list1", e);
                         RESULT = a; 
                      :}
-                  | error
-                     {: parser.report_error("Invalid argument in argument list", null); :}
+                  | error:e
+                     {: parser.report_error("Invalid argument in argument list2", e); :}
                   ;

@@ -13,18 +13,32 @@
 
 import java.io.*;
 import absyn.*;
+import java.util.*;
 
 class CM {
   public static boolean SHOW_TREE = false;
+  public static boolean SHOW_SYM = false;
 
   static public void main(String argv[]) {
     String fileName;
     if (argv[0].equals("-a")) {
       SHOW_TREE = true;
+
       fileName = argv[1];
       try {
         /* prints out tree to file in same folder as source file */
         PrintStream o = new PrintStream(new File(fileName.replace(".cm", "") + ".abs"));
+        System.setOut(o);
+        System.setErr(o);
+      } catch (FileNotFoundException ex) {
+        ex.printStackTrace();
+      }
+    } else if (argv[0].equals("-s")) {
+      SHOW_SYM = true;
+      fileName = argv[1];
+      try {
+        /* prints out tree to file in same folder as source file */
+        PrintStream o = new PrintStream(new File(fileName.replace(".cm", "") + ".sym"));
         System.setOut(o);
         System.setErr(o);
       } catch (FileNotFoundException ex) {
@@ -38,9 +52,24 @@ class CM {
       parser p = new parser(new Lexer(new FileReader(fileName)));
       Absyn result = (Absyn) (p.parse().value);
       if (SHOW_TREE && result != null) {
-        System.out.println("The abstract syntax tree is:");
+        System.out.println("\nThe abstract syntax tree is:");
         ShowTreeVisitor visitor = new ShowTreeVisitor();
         result.accept(visitor, 0);
+      }
+      if (SHOW_SYM && result != null) {
+        System.out.println("\nEntering the global scope:");
+        SemanticAnalyzer analyzer = new SemanticAnalyzer();
+        result.accept(analyzer, 1);
+        analyzer.printHash(analyzer.table, 1);
+        System.out.println("Leaving the global scope");
+        // TESTING, print out symbol table
+        // analyzer.table.forEach((s, nodeList) -> {
+        //   Iterator<NodeType> i = nodeList.iterator();
+        //   while (i.hasNext()) {
+        //     NodeType n = i.next();
+        //     System.out.println("Type: " + n.def + " Name: " + n.name + " Level: " + n.level);
+        //   }
+        // });
       }
     } catch (Exception e) {
       /* do cleanup here -- possibly rethrow e */

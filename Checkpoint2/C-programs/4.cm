@@ -1,19 +1,25 @@
 /* 
- * This program shows 2 errors, that are recoverable.
- * The first error is when a paramater does not have a comma
- * between it an another parameter, and the second error
- * is when there is a floating negative sign in fornt of the paramater.
- * For both of these cases the paramaters are skipped and processing continues.
- */
+* This program shows that assignment types have to be equal and the
+ * two operands have to also be equal.
+*/
 
-int gcd(int u, int v) {
-  if (v == 0) return u;
-  else return gcd(v v, u - u/v*v);
-}
-
-void main(void) {
-  int x; int y;
-  x = input();
-  y = input();
-  output(gcd(x, -y));
+void minloc(int a[], int low, int high) {
+  int i; int x; int k;
+  k = low;
+  x = a[low];
+  i = low + 1;
+  k = a[minloc()];
+  x = low + 1;
+  x = low2 - 1;
+  x = k = 1;
+  x = minloc();
+  
+  while (i < high) {
+    if (a[i] < x) {
+       x = a[i];
+       k = i; 
+    }
+    i = i + 1;
+  } 
+  return;
 }

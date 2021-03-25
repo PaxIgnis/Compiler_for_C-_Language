@@ -1,57 +1,33 @@
 /* 
-* This program shows 4 errors, that are recoverable.
-* Both of the error are to do with incorrect declarations 
-* for variables. The first error is an incorrectly spelled type,
-* and the second error is a missing type. In both instances the
-* error is flagged, and in order to recover from the error and not 
-* run into more trouble further on due to a missing variable declaration,
-* the variables are assumed to have a type of int.
- * he first is an unknown type for the function declaration.
- * Boolean is not a recognized type, so it is treated as int.
- * Main is missing a type declaration, which is an error, so this 
- * function is also treated as int.
- * And finally the last function does not include errors,
- * so it should be parsed correctly with its tree representatio.
+* This program shows multiple errors, including testing test conditions for while/if loops and functions calls;
 */
 
-boolean gcd(int u, int v) {
-  if (v == 0) return u;
-  else return gcd(v, u – u/v*v);
-  /* note that u – u/v*v = u mod v */
-}
+void output(int fac[]);
 
-main(void) {
-  int x; int y;
-  x = input(); y = input();
-  output(gcd(x, y));
-}
+void input(void);
 
-int minloc(int a[], int low, int high) {
-  int i; int x; int k;
-  k = low;
-  x = a[low];
-  i = low + 1;
-  while (i < high) {
-    if (a[i] < x) {
-       x = a[i];
-       k = i; 
-    }
-    i = i + 1;
+void foo(void);
+int xxx[1];
+
+void main(void) {
+  int x;
+  int yy[8];
+  void yyy;
+  int fac;
+  int y;
+  x = fac = 1 + 2 + y = 3;
+  xxx[input()] = aas = 2;
+  xxx[xxx[xxx[a]]] = 4;
+  xxx[yyy] = yy[1];
+  x = input();
+  fac = 1;
+
+  while (main()) {
+    fac = fac * x;
+    x = x - 1;
+    fac = fac - yyyy;
   } 
-  return k;
-}
 
-int minloc(int a[], int low, int high) {
-  intt i; x; int k;
-  k = low;
-  x = a[low];
-  i = low + 1;
-  while (i < high) {
-    if (a[i] < x) {
-       x = a[i];
-       k = i; 
-    }
-    i = i + 1;
-  } 
-  return k;
+  output(fac);
+  return 1;
 }

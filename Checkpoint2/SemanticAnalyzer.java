@@ -1,6 +1,5 @@
 import absyn.*;
 import java.util.*;
-import java.util.function.Function;
 
 public class SemanticAnalyzer implements AbsynVisitor {
     HashMap<String, ArrayList<NodeType>> table;
@@ -38,18 +37,13 @@ public class SemanticAnalyzer implements AbsynVisitor {
     }
 
     public void visit(AssignExp exp, int level) {
-        // indent(level);
-        // System.out.println("AssignExp:");
-        // level++;
         
         exp.lhs.accept(this, level);
         exp.rhs.accept(this, level);
-        // CallExp, OpExp, VarExp
-        
+        // exp is of type CallExp, OpExp, VarExp
         if (getType(exp.lhs) != getType(exp.rhs)) {
             System.out.println("Error, assignment types do not match at: row "+exp.row+" column "+exp.col);
         }
-        // System.out.println(exp.lhs + " "+exp.rhs);
     }
 
     public void visit(IfExp exp, int level) {
@@ -62,8 +56,7 @@ public class SemanticAnalyzer implements AbsynVisitor {
                 System.out.println("Error, test condition for if stmt must be of type int at: row "+exp.row+" column "+exp.col);
             }
         } else {
-            // indent(level);
-            // System.out.println("Invalid Expresion Statement");
+            System.out.println("Error, no test condition for if stmt at: row "+exp.row+" column "+exp.col);
         }
 
         exp.thenpart.accept(this, level);
@@ -77,57 +70,9 @@ public class SemanticAnalyzer implements AbsynVisitor {
     }
 
     public void visit(IntExp exp, int level) {
-        // if (exp.dType == null) {
-        //     System.out.println("NULL");
-        //     // exp.dType = 0;
-        // } else {
-        //     System.out.println("not NULL " + exp.dType);
-        // }
-        // indent(level);
-        // System.out.println("IntExp: " + exp.value);
     }
 
     public void visit(OpExp exp, int level) {
-        // indent(level);
-        // System.out.print("OpExp:");
-        // switch (exp.op) {
-        // case OpExp.PLUS:
-        //     System.out.println(" + ");
-        //     break;
-        // case OpExp.MINUS:
-        //     System.out.println(" - ");
-        //     break;
-        // case OpExp.TIMES:
-        //     System.out.println(" * ");
-        //     break;
-        // case OpExp.OVER:
-        //     System.out.println(" / ");
-        //     break;
-        // case OpExp.EQ:
-        //     System.out.println(" = ");
-        //     break;
-        // case OpExp.LT:
-        //     System.out.println(" < ");
-        //     break;
-        // case OpExp.GT:
-        //     System.out.println(" > ");
-        //     break;
-        // case OpExp.GTEQ:
-        //     System.out.println(" >= ");
-        //     break;
-        // case OpExp.LTEQ:
-        //     System.out.println(" <= ");
-        //     break;
-        // case OpExp.EQUALS:
-        //     System.out.println(" == ");
-        //     break;
-        // case OpExp.NEQUALS:
-        //     System.out.println(" != ");
-        //     break;
-        // default:
-        //     System.out.println("Unrecognized operator at line " + exp.row + " and column " + exp.col);
-        // }
-        // level++;
         exp.left.accept(this, level);
         exp.right.accept(this, level);
         if (getType(exp.left) != getType(exp.right)) {
@@ -136,35 +81,16 @@ public class SemanticAnalyzer implements AbsynVisitor {
     }
 
     public void visit(VarExp exp, int level) {
-        // indent(level);
-        // System.out.println("VarExp: ");
         exp.variable.accept(this, ++level);
     }
 
     public void visit(NilExp exp, int level) {
-        // indent(level);
-        // System.out.println("NilExp");
     }
 
     public void visit(NameTy typ, int level) {
-        // indent(level);
-        // System.out.print("NameTy:");
-        // switch (typ.typ) {
-        // case NameTy.INT:
-        //     System.out.println(" INT ");
-        //     break;
-        // case NameTy.VOID:
-        //     System.out.println(" VOID ");
-        //     break;
-        // default:
-        //     System.out.println("Unrecognized type at line " + typ.row + " and column " + typ.col);
-        // }
     }
 
     public void visit(SimpleVar var, int level) {
-        // indent(level);
-        // System.out.println("SimpleVar: " + var.name);
-        // Add key to hash map at the current level
         if (!table.containsKey(var.name)) {
             System.out.println("Error, use of undefined variable '"+var.name+"' at: row "+var.row+" column "+var.col);
         }
@@ -219,10 +145,8 @@ public class SemanticAnalyzer implements AbsynVisitor {
     }
 
     public void visit(CallExp exp, int level) {
-        // indent(level);
-        // System.out.println("CallExp: " + exp.func);
         if (exp.args != null)
-            exp.args.accept(this, ++level); /* TODO: Might change */
+            exp.args.accept(this, ++level);
         if (!table.containsKey(exp.func)) {
             System.out.println("Error, use of undefined function '"+exp.func+"[]' at: row "+exp.row+" column "+exp.col);
         } else {
@@ -283,9 +207,6 @@ public class SemanticAnalyzer implements AbsynVisitor {
     }
 
     public void visit(ReturnExp exp, int level) {
-        // indent(level);
-        // System.out.println("ReturnExp:");
-        // 
         if (exp.exp instanceof NilExp) {
             if (isInteger(currentFunc)) {
                 System.out.println("Error, mismatched return type, should be void '"+currentFunc+"[]' at: row "+exp.row+" column "+exp.col);
@@ -299,9 +220,6 @@ public class SemanticAnalyzer implements AbsynVisitor {
     }
 
     public void visit(CompoundExp exp, int level) {
-        // indent(level);
-        // System.out.println("CompoundExp: ");
-        // level++;
         if (exp.decs != null)
             exp.decs.accept(this, level);
         if (exp.exps != null)
@@ -313,7 +231,6 @@ public class SemanticAnalyzer implements AbsynVisitor {
         if (!table.containsKey(dec.func)) {
             table.put(dec.func, new ArrayList<NodeType>());
         }
-        // table.get(dec.func).add(new NodeType(dec.func, dec, level));
         addToHash(table, new NodeType(dec.func, dec, level));
 
         indent(level);
@@ -324,8 +241,6 @@ public class SemanticAnalyzer implements AbsynVisitor {
         if (dec.body != null) {
             dec.body.accept(this, level);
         }
-        
-        
         
         printHash(table, level);
         indent(level - 1);
@@ -351,10 +266,7 @@ public class SemanticAnalyzer implements AbsynVisitor {
             }
 
         }
-        // indent(level);
-        // System.out.println("SimpleDec: " + varDec.name);
         varDec.typ.accept(this, ++level);
-
     }
 
     public void visit(ArrayDec varDec, int level) {
@@ -369,23 +281,6 @@ public class SemanticAnalyzer implements AbsynVisitor {
             System.out.println("Error, array variable cannot be void '" + varDec.name + "[]' at: row " + varDec.row + " column "
                     + varDec.col);
         }
-
-        // indent(level);
-        // System.out.println("ArrayDec: " + varDec.name);
-        // final int fLevel = level++;
-        // varDec.typ.accept(this, level);
-        // varDec.size.accept(this, level);
-        
-        // remove hashmap from all levels higher than the current one
-        // table.forEach((s, nodeList) -> {
-        //     Iterator<NodeType> i = nodeList.iterator();
-        //     while (i.hasNext()) {
-        //         NodeType n = i.next();
-        //         if (n.level < fLevel) {
-        //             i.remove();
-        //         }
-        //     }
-        // });
     }
 
     public void printHash(HashMap<String, ArrayList<NodeType>> table, final int level) {
@@ -423,9 +318,7 @@ public class SemanticAnalyzer implements AbsynVisitor {
 
                         System.out.println(n.name + ": " + "(" + params + ") -> " + (type == 0 ? "INT" : "VOID"));
                     }
-
                 }
-
             }
         });
     }
@@ -468,16 +361,9 @@ public class SemanticAnalyzer implements AbsynVisitor {
             }
         }
         return false;
-        // System.out.println(((FunctionDec)dType).result + "  " + ((FunctionDec)dType).func);
-        // if (dType instanceof SimpleDec && ((SimpleDec)dType).typ.typ == 0) {
-        //     return true;
-        // } else if (dType instanceof ArrayDec && ((ArrayDec)dType).typ.typ == 0) {
-        //     return true;
-        // } else if (dType instanceof FunctionDec && ((FunctionDec)dType).result.typ == 0) {
-        //     return true;
-        // }
-        // return false;
     }
+
+
     /**
      * getType
      * 
@@ -485,7 +371,6 @@ public class SemanticAnalyzer implements AbsynVisitor {
      * @return -1 for error, 0 for int and 1 for void
      */
     int getType(Exp exp) {
-        // System.out.println(exp);
         if (exp instanceof IntExp) {
             return 0;
         } else if (exp instanceof VarExp || exp instanceof CallExp) {

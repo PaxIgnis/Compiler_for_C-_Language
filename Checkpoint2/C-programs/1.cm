@@ -1,5 +1,9 @@
-/* A program to perform selection sort 
-   on a 10 element array */
+/* A fully working program, which is the sort program 
+  provided by the professor. Function defs have been added.
+  No errors should be shown for this file. 
+*/
+void output(int a);
+int input(void);
 
 int x[10];
 

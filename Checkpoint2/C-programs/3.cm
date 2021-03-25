@@ -1,18 +1,15 @@
 /* 
-* This program shows 2 errors, that are recoverable.
-* Both of the error are to do with incorrect declarations 
-* for variables. The first error is an incorrectly spelled type,
-* and the second error is a missing type. In both instances the
-* error is flagged, and in order to recover from the error and not 
-* run into more trouble further on due to a missing variable declaration,
-* the variables are assumed to have a type of int.
+* This program shows that array index must be of type int.
 */
 
-int minloc(int a[], int low, int high) {
-  intt i; x; int k;
+void minloc(int a[], int low, int high) {
+  int i; int x; int k;
   k = low;
   x = a[low];
   i = low + 1;
+  k = a[minloc()];
+  x = a[a[a[a[a[1]]]]];
+  
   while (i < high) {
     if (a[i] < x) {
        x = a[i];
@@ -20,5 +17,5 @@ int minloc(int a[], int low, int high) {
     }
     i = i + 1;
   } 
-  return k;
+  return;
 }

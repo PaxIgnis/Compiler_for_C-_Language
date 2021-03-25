@@ -23,3 +23,18 @@ parser.java: cminus.cup
 
 clean:
 	rm -f parser.java Lexer.java sym.java *.class absyn/*.class absyn/._* *~
+
+test1:
+	java -cp projects/java-cup-11b.jar:. CM -s C-programs/1.cm
+
+test2:
+	java -cp projects/java-cup-11b.jar:. CM -s C-programs/2.cm
+
+test3:
+	java -cp projects/java-cup-11b.jar:. CM -s C-programs/3.cm
+
+test4:
+	java -cp projects/java-cup-11b.jar:. CM -s C-programs/4.cm
+
+test5:
+	java -cp projects/java-cup-11b.jar:. CM -s C-programs/5.cm

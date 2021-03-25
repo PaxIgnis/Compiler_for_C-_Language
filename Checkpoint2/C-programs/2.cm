@@ -1,29 +1,31 @@
 /*
- * This program shows 2 errors, that are recoverable. 
- * The first is an unknown type for the function declaration.
- * Boolean is not a recognized type, so it is treated as int.
- * Main is missing a type declaration, which is an error, so this 
- * function is also treated as int.
- * And finally the last function does not include errors,
- * so it should be parsed correctly with its tree representatio.
+ * This program shows undefined errors.
+ * It shows an error when a function is called that has not been defined.
+ * It shows an error when the assignment types in the undefined function are used.
+ * It shows an error when variables are used that have not been defined.
+ * It shows an error when variables are redefined in the same scope;
+ * It shows an error when functions are defined more than once.
  */
 
-boolean gcd(int u, int v) {
+
+int gcd(int u, int v) {
   if (v == 0) return u;
-  else return gcd(v, u – u/v*v);
+  else return gcd(v, u/v*v);
   /* note that u – u/v*v = u mod v */
 }
 
-main(void) {
+void main(void) {
   int x; int y;
   x = input(); y = input();
   output(gcd(x, y));
 }
 
-int minloc(int a[], int low, int high) {
-  int i; int x; int k;
+int gcd(int a[], int low, int high) {
+  int i; int x; int k; int test;
+  int test;
   k = low;
   x = a[low];
+  x = 1 + j;
   i = low + 1;
   while (i < high) {
     if (a[i] < x) {

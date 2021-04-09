@@ -45,7 +45,7 @@ class CM {
       } catch (FileNotFoundException ex) {
         ex.printStackTrace();
       }
-    } else if (argv[0].equals("-s")) {
+    } else if (argv[0].equals("-c")) {
       SHOW_CODE = true;
       fileName = argv[1];
     } else {
@@ -53,6 +53,7 @@ class CM {
     }
     /* Start the parser */
     try {
+      System.out.println(fileName);
       parser p = new parser(new Lexer(new FileReader(fileName)));
       Absyn result = (Absyn) (p.parse().value);
       if (SHOW_TREE && result != null) {
@@ -76,6 +77,7 @@ class CM {
         // });
       }
       if (SHOW_CODE && result != null) {
+        System.out.println("starting code generator");
         CodeGenerator gen = new CodeGenerator(fileName.replace(".cm", "") + ".tm");
         result.accept(gen, 1, false);
       }

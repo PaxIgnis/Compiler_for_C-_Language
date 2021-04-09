@@ -38,3 +38,6 @@ test4:
 
 test5:
 	java -cp projects/java-cup-11b.jar:. CM -s C-programs/5.cm
+
+testCodeGen:
+	java -cp projects/java-cup-11b.jar:. CM -c C-programs/codegen.cm

@@ -1,0 +1,186 @@
+/*
+  Created by: Fei Song
+  File Name: tiny.cup
+  To Build: java java_cup.Main < tiny.cup
+*/
+   
+   
+/* ----------------------Preliminary Declarations Section--------------------*/
+   
+/* Import the class java_cup.runtime.*  */
+//import java_cup.runtime.*;
+import absyn.*;
+   
+/* Parser code to change the way the parser reports errors (include
+   line and column number of the error). */
+parser code {:
+    
+    /* Change the method report_error so it will display the line and
+       column of where the error occurred in the input as well as the
+       reason for the error which is passed into the method in the
+       String 'message'. */
+    public void report_error(String message, Object info) {
+   
+        /* Create a StringBuffer called 'm' with the string 'Error' in it. */
+        StringBuffer m = new StringBuffer("Error");
+   
+        /* Check if the information passed to the method is the same
+           type as the type java_cup.runtime.Symbol. */
+        if (info instanceof java_cup.runtime.Symbol) {
+            /* Declare a java_cup.runtime.Symbol object 's' with the
+               information in the object info that is being typecasted
+               as a java_cup.runtime.Symbol object. */
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+   
+            /* Check if the line number in the input is greater or
+               equal to zero. */
+            if (s.left >= 0) {                
+                /* Add to the end of the StringBuffer error message
+                   the line number of the error in the input. */
+                m.append(" in line "+(s.left+1));   
+                /* Check if the column number in the input is greater
+                   or equal to zero. */
+                if (s.right >= 0)                    
+                    /* Add to the end of the StringBuffer error message
+                       the column number of the error in the input. */
+                    m.append(", column "+(s.right+1));
+            }
+        }
+   
+        /* Add to the end of the StringBuffer error message created in
+           this method the message that was passed into this method. */
+        m.append(" : "+message);
+   
+        /* Print the contents of the StringBuffer 'm', which contains
+           an error message, out on a line. */
+        System.err.println(m);
+    }
+   
+    /* Change the method report_fatal_error so when it reports a fatal
+       error it will display the line and column number of where the
+       fatal error occurred in the input as well as the reason for the
+       fatal error which is passed into the method in the object
+       'message' and then exit.*/
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+
+:};
+   
+   
+/* ------------Declaration of Terminals and Non Terminals Section----------- */
+   
+terminal IF, ELSE, INT, RETURN, VOID, WHILE;
+terminal PLUS, MINUS, TIMES, OVER, LT, LTEQ, GT, GTEQ, EQUALS, NEQUALS, EQ, SEMI, COM, LPAREN, RPAREN, LBRACK, RBRACK, LBRACE, RBRACE;
+terminal ID, NUM;
+terminal ERROR;
+
+
+non terminal program, declar_list, param_list, stmt_list, arg_list;
+
+non terminal declar, var_declar, fun_declar, local_declar;
+non terminal stmt, expr_stmt, selec_stmt, iter_stmt, return_stmt, comp_stmt;
+non terminal exp, var;
+non terminal type_specif, params, param;
+
+precedence nonassoc LT, LTEQ, GT, GTEQ, EQ, EQUALS, NEQUALS;
+precedence left PLUS, MINUS;
+precedence left TIMES, OVER;
+
+/* ----------------------------Grammar Section-------------------- */
+   
+start with program;
+
+program        ::= declar_list
+                  ;
+
+declar_list    ::= declar_list declar
+                  | declar
+                  ;
+
+declar         ::= var_declar
+                  | fun_declar
+                  ;
+
+var_declar     ::= type_specif ID SEMI
+                  | type_specif ID LBRACK NUM RBRACK SEMI
+                  ;
+
+type_specif    ::= INT
+                  | VOID
+                  ;
+
+fun_declar     ::= type_specif ID LPAREN params RPAREN comp_stmt
+                  ;
+
+params         ::= param_list
+                  | VOID
+                  ;
+
+param_list     ::= param_list COM param
+                  | param
+                  ;
+
+param          ::= type_specif ID
+                  | type_specif ID LBRACK RBRACK
+                  ;
+
+comp_stmt      ::= LBRACE local_declar stmt_list RBRACE
+                  ;
+
+local_declar   ::= local_declar var_declar
+                  |
+                  ;
+
+stmt_list      ::= stmt_list stmt
+                  |
+                  ;
+
+stmt           ::= expr_stmt
+                  | comp_stmt
+                  | selec_stmt
+                  | iter_stmt
+                  | return_stmt
+                  ;
+
+expr_stmt      ::= exp SEMI
+                  | SEMI
+                  ;
+
+selec_stmt     ::= IF LPAREN exp RPAREN stmt
+                  | IF LPAREN exp RPAREN stmt ELSE stmt
+                  ;
+
+iter_stmt      ::= WHILE LPAREN exp RPAREN stmt
+                  ;
+
+return_stmt    ::= RETURN exp SEMI
+                  | RETURN SEMI
+                  ;
+
+exp            ::= var EQ exp
+                  | exp LTEQ exp
+                  | exp LT exp
+                  | exp GT exp
+                  | exp GTEQ exp
+                  | exp EQUALS exp
+                  | exp NEQUALS exp
+                  | exp PLUS exp
+                  | exp MINUS exp
+                  | exp TIMES exp
+                  | exp OVER exp
+                  | LPAREN exp RPAREN
+                  | ID LPAREN arg_list RPAREN
+                  | ID LPAREN RPAREN
+                  | NUM
+                  | var
+                  ;
+
+var            ::= ID
+                  | ID LBRACK exp RBRACK
+                  ;
+
+arg_list       ::= arg_list COM exp
+                  | exp
+                  ;

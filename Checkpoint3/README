@@ -1,0 +1,103 @@
+Hendrik van der Meijden
+CIS4650 W21
+March, 2021
+
+The program requires jFlex to be installed, and available as a PATH variable. 
+The CUP jar is provided in the submission and does not need to be installed. 
+To make the program just type ‘make’.
+
+To test the test files for symbol/type-checking, use make. So to test 1.cm type: make test1
+To test the symbol table and type-checking use: java -cp projects/java-cup-11b.jar:. CM -s C-programs/gcd.cm
+To test the Scanner use: java -cp projects/java-cup-11b.jar:. Scanner < C-programs/gcd.cm
+To test the parser w/o AST: java -cp projects/java-cup-11b.jar:. CM C-programs/gcd.cm
+To test the parser with AST: java -cp projects/java-cup-11b.jar:. CM -a C-programs/gcd.cm
+(the AST will be in a file: C-programs/gcd.abs)
+
+***********************************************
+The report is below here as an alternate format the the pdf.
+******
+
+Checkpoint 2 Report
+
+Symbol Table
+
+The symbol table was made using a hashmap, with the keys being the names of the variable/function 
+declarations and the values being arraylists of nodes. These nodes keep track of the type of declaration 
+and the level or scope that the declaration was made in. The first step was creating the new class 
+NodeType that would store the levels and declarations. Then create a new visitor class SemanticAnalyzer 
+that would do the processing and creation of the symbol table. The next step was to add declarations too 
+the hashmap, and this was done in the declaration sections for function, simple variable and array variable. 
+The logic simply checks if the declaration (key) is already in the hashmap, and if not it adds it too the 
+hashmap. Then it checks if a nodetype is already in the hashmap with the same key and same level. 
+If this is the case then there has been a double declaration in the same scope, and an error is thrown. 
+If a value does not exists with the same level, then a new node is added to the arraylist for the key.
+The level or scope increases in a few cases, such as functions, while loops, for loops and if statements. 
+When leaving the scope (i.e. at the end of the function) all of the declarations made in the inner 
+scopes are removed from the hashmap as they are no longer visible to the rest of the code.
+It is at the end of processing for a scope, right before returning the parent scope that the elements 
+in this scope are printed to the screen. If a scope does not have any declarations it is still printed 
+to the screen that the scope has been entered and exited. And because of using post-order traversal, all 
+of the inner scope information is printed out first before the declarations from the outer scopes.
+The actual printout of the symbol table includes indentation to better keep track of the 
+different scope levels. The variables are printed out with their types, and the array variables 
+are printed out with their types and the size of array (if provided during declaration). 
+The function declarations are printed out with their return types and the parameter types 
+(but not parameter var names). It is printed out when a scope is entered and exited.
+If a value is redefined in the same scope then an error is displayed saying the value 
+is being redefined, and shows the location of the error and the location of the initial declaration.
+If a value is used that has not yet been defined, an error is displayed.
+Function definitions have been added to the grammar, but they are not printed out when displaying 
+the symbol table as this would be redundant as no declarations can be made in the definition.
+
+Type Checking
+
+Array index is checked to make sure it is of type int, if not an error is printed out. 
+This includes checking if the index is a function, and ensuring that the function has been defined 
+and that the function returns an int. Type checking for the variable declarations was added, 
+ensuring that simple variables and array variables cannot be of type int.
+The next step was type checking for matching two sides of an assignment. This works recursively, 
+so if an assignment is used in another assignment, it will not break the system.
+The next step was type checking for matching two operands. The grammar picks two values at a time 
+for operand operations, and if any two are not of the same type, then an error is thrown.
+The next step was type checking for return types of functions. So checking that void functions 
+only return void and int functions only return int types.
+The next step involved checking that the parameters used in functions calls matched up with the 
+correct types that were in the function definitions. And that the correct number of parameters also matched.
+The next step involved checking that the test conditions for if and while statements were of type 
+int (and it was assumed that Boolean type operations could be considered as binary). If they did 
+not satisfy this condition than an error was thrown.
+
+Flags
+
+The ‘-s’ flag has been added. This is used to print out the symbol table to the <filename>.sym file. 
+As per the spec, only a single flag can be used at a time. The flag options currently are ‘-a’ for the 
+AST and ‘-s’ for the symbol table.
+Assumptions and Limitations and Possible Improvements
+•	It is assumed that if a file is correctly formatted without any errors it will always produce a correct 
+syntax tree.
+•	It is assumed that the program is run on a linux device, if not then the makefile may require some changes.
+•	The ‘-a’ flag has been implemented, which means that if a user does not pass this flag, then the AST will 
+not be generated, but the parsing will proceed. If this flag is passed in, then the AST will be created and
+ all of the output from the program will be sent to a file with the same name as the provided file, except 
+ the ‘.cm.’ will be replaced with ‘.abs’.
+•	It is assumed that all input files will have the suffix ‘.cm’
+•	The provided c minus sample files are provided in the folder ‘C-programs’, and the output AST and sym 
+files will also be in this folder.
+
+
+
+A JFlex+Cup implementation for the Cplus language.
+
+  Note that you need to modify the paths for CLASSPATH, JFLEX, and CUP in 
+the Makefile so that the related commands can be found on your particular 
+machine.  For example, the given settings are for the Linux server and the 
+commented settings are for my macbook.
+
+  Build instructions are inside the report.
+  To rebuild the parser, type "make clean" and type "make" again.
+
+  Also note that all the abstract syntax tree structures are defined under
+the directory "absyn" and the methods for showing a syntax tree is implemented
+by the visitor pattern in "ShowTreeVisitor.java".  Since some java files are 
+generated automatically, they may contain variables that are not used, which 
+are safe to ignore in the compilation process.

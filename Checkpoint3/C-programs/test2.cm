@@ -1,0 +1,6 @@
+/* A program to perform selection sort 
+   on a 10 element array */
+
+int x[10];
+
+

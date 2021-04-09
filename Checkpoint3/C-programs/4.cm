@@ -1,0 +1,25 @@
+/* 
+* This program shows that assignment types have to be equal and the
+ * two operands have to also be equal.
+*/
+
+void minloc(int a[], int low, int high) {
+  int i; int x; int k;
+  k = low;
+  x = a[low];
+  i = low + 1;
+  k = a[minloc()];
+  x = low + 1;
+  x = low2 - 1;
+  x = k = 1;
+  x = minloc();
+  
+  while (i < high) {
+    if (a[i] < x) {
+       x = a[i];
+       k = i; 
+    }
+    i = i + 1;
+  } 
+  return;
+}

@@ -8,6 +8,6 @@ public class NilExp extends Exp {
     }
 
     public void accept(AbsynVisitor visitor, int level, boolean isAddr) {
-        visitor.visit(this, level, false);
+        visitor.visit(this, level, isAddr);
     }
 }

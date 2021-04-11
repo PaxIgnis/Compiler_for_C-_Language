@@ -7,7 +7,7 @@ import java.util.*;
 
 public class CodeGenerator implements AbsynVisitor {
     HashMap<String, ArrayList<NodeType>> table;
-    int mainEntry, globalOffset;
+    int mainEntry, globalOffset, offset;
     static int emitLoc = 0;
     static int highEmitLoc = 0;
     final int pc = 7;
@@ -31,6 +31,17 @@ public class CodeGenerator implements AbsynVisitor {
 
     public void visit(DecList decList, int offset, boolean isAddress) {
         clearFile();
+
+        // add input function to hashmap
+        table.put("input", new ArrayList<NodeType>());
+        VarDecList params = new VarDecList(new SimpleDec(0, 0, new NameTy(0, 0, NameTy.VOID), ""), null);
+        addToHash(table, new NodeType("input", new FunctionDec(0, 0, new NameTy(0, 0, NameTy.INT), "input", params, null, 4), 0));
+
+        // add output function to hashmap
+        table.put("output", new ArrayList<NodeType>());
+        params = new VarDecList(new SimpleDec(0, 0, new NameTy(0, 0, NameTy.INT), "a"), null);
+        addToHash(table, new NodeType("output", new FunctionDec(0, 0, new NameTy(0, 0, NameTy.VOID), "output", params, null, 7), 0));
+
         // prelude for code generation
         emitComment("code for prelude");
         emitRM("LD", gp, 0, ac, "load up with maxaddr");
@@ -82,92 +93,252 @@ public class CodeGenerator implements AbsynVisitor {
     }
 
     @Override
-    public void visit(ExpList exp, int level, boolean isAddr) {
-        System.out.println("here1");
-        
+    public void visit(ExpList expList, int level, boolean isAddr) {
+        System.out.println("here1 ExpList");
+        while (expList != null) {
+            expList.head.accept(this, level, false);
+            expList = expList.tail;
+        }
     }
 
     @Override
     public void visit(AssignExp exp, int level, boolean isAddr) {
-        System.out.println("here2");
-        
+        System.out.println("here2 AssignExp");
+
+        emitComment("-> op");
+        if (exp.lhs.variable instanceof SimpleVar) {
+            exp.lhs.accept(this, level, true);
+            emitRM("ST", ac, offset, fp, "op: push left");
+            offset--;
+        } else {
+            System.out.println("notsimplevar");
+            exp.lhs.accept(this, level, false);
+            offset--;
+        }
+        exp.rhs.accept(this, level, false);
+
+        emitRM("LD", 1, ++offset, fp, "op: load left");
+        emitRM("ST", ac, 0, 1, "assign: store value");
+        emitComment("<- op");
     }
 
     @Override
     public void visit(IfExp exp, int level, boolean isAddr) {
-        System.out.println("here3");
+        System.out.println("here3 IfExp");
         
     }
 
     @Override
     public void visit(IntExp exp, int level, boolean isAddr) {
-        System.out.println("here4");
-        
+        System.out.println("here4 IntExp");
+        emitComment("-> constant");
+        emitRM("LDC", ac, Integer.parseInt(exp.value), 0, "load const");
+        emitComment("<- constant");
     }
 
     @Override
     public void visit(OpExp exp, int level, boolean isAddr) {
-        System.out.println("here5");
+        System.out.println("here5 OpExp");
         
+        emitComment("-> op");
+
+        exp.left.accept(this, level, isAddr);
+        if (exp.left instanceof IntExp) {
+            emitRM("ST", ac, offset, fp, "op: push left");
+            offset--;
+        } else if (exp.left instanceof VarExp) {
+            if (((VarExp)exp.left).variable instanceof SimpleVar) {
+                emitRM("ST", ac, offset, fp, "op: push left");
+            }
+            offset--;
+        } else if (exp.left instanceof OpExp) {
+            emitRM("ST", ac, offset, fp, "op: push left");
+            offset--;
+        }
+        
+        exp.right.accept(this, level, isAddr);
+        offset++;
+        emitRM("LD", 1, offset, fp, "op: load left");
+
+        switch (exp.op) {
+        case OpExp.PLUS:
+            emitRO("ADD", ac, 1, ac, "op +");
+            break;
+        case OpExp.MINUS:
+            emitRO("SUB", ac, 1, ac, "op -");
+            break;
+        case OpExp.TIMES:
+            emitRO("MUL", ac, 1, ac, "op *");
+            break;
+        case OpExp.OVER:
+            emitRO("DIV", ac, 1, ac, "op /");
+            break;
+        case OpExp.EQ:
+            emitRO("EQU", ac, 1, ac, "op =");
+            break;
+        case OpExp.LT:
+            emitRO("SUB", ac, 1, ac, "op <");
+            emitRM("JLT", ac, 2, pc, "br if true");
+            emitRM("LDC", ac, 0, 0, "false case");
+            emitRM("LDA", pc, 1, pc, "unconditional jmp");
+            emitRM("LDC", ac, 1, 0, "true case");
+            break;
+        case OpExp.GT:
+            emitRO("SUB", ac, 1, ac, "op >");
+            emitRM("JGT", ac, 2, pc, "br if true");
+            emitRM("LDC", ac, 0, 0, "false case");
+            emitRM("LDA", pc, 1, pc, "unconditional jmp");
+            emitRM("LDC", ac, 1, 0, "true case");
+            break;
+        case OpExp.GTEQ:
+            emitRO("SUB", ac, 1, ac, "op >=");
+            emitRM("JGE", ac, 2, pc, "br if true");
+            emitRM("LDC", ac, 0, 0, "false case");
+            emitRM("LDA", pc, 1, pc, "unconditional jmp");
+            emitRM("LDC", ac, 1, 0, "true case");
+            break;
+        case OpExp.LTEQ:
+            emitRO("SUB", ac, 1, ac, "op <=");
+            emitRM("JLE", ac, 2, pc, "br if true");
+            emitRM("LDC", ac, 0, 0, "false case");
+            emitRM("LDA", pc, 1, pc, "unconditional jmp");
+            emitRM("LDC", ac, 1, 0, "true case");
+            break;
+        case OpExp.EQUALS:
+            emitRO("SUB", ac, 1, ac, "op ==");
+            emitRM("JEQ", ac, 2, pc, "br if true");
+            emitRM("LDC", ac, 0, 0, "false case");
+            emitRM("LDA", pc, 1, pc, "unconditional jmp");
+            emitRM("LDC", ac, 1, 0, "true case");
+            break;
+        case OpExp.NEQUALS:
+            emitRO("SUB", ac, 1, ac, "op !=");
+            emitRM("JNE", ac, 2, pc, "br if true");
+            emitRM("LDC", ac, 0, 0, "false case");
+            emitRM("LDA", pc, 1, pc, "unconditional jmp");
+            emitRM("LDC", ac, 1, 0, "true case");
+            break;
+        }
+
+          emitComment("<- op");
     }
 
     @Override
     public void visit(VarExp exp, int level, boolean isAddr) {
-        System.out.println("here6");
+        System.out.println("here6 VarExp");
+        exp.variable.accept(this, ++level, isAddr );
         
     }
 
     @Override
     public void visit(NilExp exp, int level, boolean isAddr) {
-        System.out.println("here7");
+        System.out.println("here7 NilExp");
         
     }
 
     @Override
     public void visit(NameTy exp, int level, boolean isAddr) {
-        System.out.println("here8");
+        System.out.println("here8 NameTy");
         
     }
 
     @Override
-    public void visit(VarDecList exp, int level, boolean isAddr) {
-        System.out.println("here10");
+    public void visit(VarDecList varDecList, int level, boolean isAddr) {
+        System.out.println("here10 VarDecList");
+        while (varDecList != null) {
+            varDecList.head.accept(this, level, isAddr);
+            varDecList = varDecList.tail;
+        }
         
     }
 
     @Override
-    public void visit(SimpleDec exp, int level, boolean isAddr) {
-        System.out.println("here11");
-        
+    public void visit(SimpleDec varDec, int level, boolean isAddr) {
+        System.out.println("here11 SimpleDec");
+        if (!varDec.name.isEmpty()) {
+            if (varDec.typ.typ == 0) {
+                // Add key to hash map at the current level
+                if (!table.containsKey(varDec.name)) {
+                    table.put(varDec.name, new ArrayList<NodeType>());
+                }
+                if (level > 0) {
+                    varDec.offset = offset;
+                    varDec.nestLevel = level;
+                    offset--;
+                } else {
+                    varDec.offset = globalOffset;
+                    varDec.nestLevel = level;
+                    globalOffset--;
+                }
+                
+                addToHash(table, new NodeType(varDec.name, varDec, level));
+                if (level > 0) {
+                    emitComment("processing local var: " + varDec.name);
+                } else {
+                    emitComment("processing global var: " + varDec.name);
+                }
+            } else {
+                System.err.println("Error, variable cannot be void '" + varDec.name + "' at: row " + varDec.row
+                        + " column " + varDec.col);
+            }
+        }
+        // varDec.typ.accept(this, ++level, false);
     }
 
     @Override
     public void visit(ArrayDec exp, int level, boolean isAddr) {
-        System.out.println("here12");
+        System.out.println("here12 ArrayDec");
         
     }
 
     @Override
-    public void visit(SimpleVar exp, int level, boolean isAddr) {
-        System.out.println("here13");
+    public void visit(SimpleVar var, int level, boolean isAddr) {
+        System.out.println("here13 SimpleVar");
+        if (!table.containsKey(var.name)) {
+            System.err.println("Error, use of undefined variable '"+var.name+"' at: row "+var.row+" column "+var.col);
+        } else {
+            emitComment("-> id");
+            emitComment("looking up id: " + var.name);
+            NodeType func = table.get(var.name).get(0);
+            SimpleDec dec = ((SimpleDec)func.def);
+            if (dec.nestLevel > 0) {
+                if (isAddr == true) {
+                    emitRM("LDA", 0, dec.offset, fp, "load id address");
+                } else {
+                    emitRM("LD", 0, dec.offset, fp, "load id value");
+                }
+            } else {
+                if (isAddr == true) {
+                    emitRM("LDA", 0, dec.offset, gp, "load id address");
+                } else {
+                    emitRM("LD", 0, dec.offset, gp, "load id value");
+                }
+            }
+            emitComment("<- id");
+        }
         
     }
 
     @Override
     public void visit(IndexVar exp, int level, boolean isAddr) {
-        System.out.println("here14");
+        System.out.println("here14 IndexVar");
         
     }
 
     @Override
     public void visit(CompoundExp exp, int level, boolean isAddr) {
-        System.out.println("here15");
-        
+        System.out.println("here15 CompountExp");
+        emitComment("-> compound statement");
+        if (exp.decs != null)
+            exp.decs.accept(this, level, false);
+        if (exp.exps != null)
+            exp.exps.accept(this, level, false);
+        emitComment("<- compound statement");
     }
 
     @Override
     public void visit(FunctionDec dec, int level, boolean isAddr) {
-        System.out.println("functiondec");
+        System.out.println("here16 functiondec");
         if (!table.containsKey(dec.func)) {
             table.put(dec.func, new ArrayList<NodeType>());
         }
@@ -180,7 +351,9 @@ public class CodeGenerator implements AbsynVisitor {
         // save location to jump around function
         int savedLoc = emitSkip(1);
         emitRM("ST", 0, -1, fp, "store return");
+        level++;
         currentFunc = dec.func;
+        offset = initFO;
         dec.params.accept(this, level, false);
         if (dec.body != null) {
             dec.body.accept(this, level, false);
@@ -192,24 +365,64 @@ public class CodeGenerator implements AbsynVisitor {
         emitRM_Abs("LDA", pc, savedLoc2, "jump around fn body");
         emitRestore();
         emitComment("<- fundecl");
-
+        clearMapLevel(table, level);
         
     }
 
     @Override
     public void visit(CallExp exp, int level, boolean isAddr) {
-        System.out.println("here17");
+        if (!table.containsKey(exp.func)) {
+            System.out.println("Error, use of undefined function '"+exp.func+"[]' at: row "+exp.row+" column "+exp.col);
+        } else {
+            System.out.println("here17 CallExp");
+
+            int curFO = initFO;
+            NodeType func = table.get(exp.func).get(0);
+            FunctionDec dec = ((FunctionDec)func.def);
+
+            emitComment("-> call of function: " + exp.func);
+
+            ExpList expList = exp.args;
+            while (expList != null) {
+                expList.head.accept(this, level, false);
+                emitRM("ST", ac, offset + curFO, fp, "op: push left");
+                expList = expList.tail;
+                curFO--;
+            }
+
+            emitRM("ST", fp, offset, fp, "push ofp");
+            emitRM("LDA", fp, offset, fp, "push frame");
+            emitRM("LDA", 0, 1, pc, "load ac with ret ptr");
+            emitRM_Abs("LDA", pc, dec.funcAddr, "jump to fun loc");
+            emitRM("LD", fp, 0, fp, "pop frame");
+            emitComment("<- call");
+        }
         
     }
 
     @Override
     public void visit(WhileExp exp, int level, boolean isAddr) {
-        System.out.println("here18");
-        
+        System.out.println("here18 WhileExp");
+        emitComment("-> while");
+        emitComment("while: jump after body comes back here");
+        int savedLoc = emitSkip(0);
+        level++;
+        exp.test.accept(this, level, false );
+        int savedLoc2 = emitSkip(1);
+        emitComment("while: jump to end belongs here");
+        exp.body.accept(this, level, false );
+        emitRM_Abs("LDA", pc, savedLoc, "while: absolute jmp to test");
+        int savedLoc3 = emitSkip(0);
+        emitBackup(savedLoc2);
+        emitRM_Abs("JEQ", 0, savedLoc3, "while: jmp to end");
+        emitRestore();
+        emitComment("<- while");
+
+        clearMapLevel(table, level);
     }
 
     public void visit(ReturnExp exp, int level, boolean isAddr) {
-        System.out.println("here19");
+        System.out.println("here19 ReturnExp");
         
     }
 

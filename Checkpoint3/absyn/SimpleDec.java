@@ -3,6 +3,8 @@ package absyn;
 public class SimpleDec extends VarDec {
     public NameTy typ;
     public String name;
+    public int nestLevel;
+    public int offset;
 
     public SimpleDec(int row, int col, NameTy typ, String name) {
         this.row = row;
@@ -12,6 +14,6 @@ public class SimpleDec extends VarDec {
     }
 
     public void accept(AbsynVisitor visitor, int level, boolean isAddr) {
-        visitor.visit(this, level, false);
+        visitor.visit(this, level, isAddr);
     }
 }

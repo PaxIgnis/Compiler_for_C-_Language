@@ -79,7 +79,7 @@ class CM {
       if (SHOW_CODE && result != null) {
         System.out.println("starting code generator");
         CodeGenerator gen = new CodeGenerator(fileName.replace(".cm", "") + ".tm");
-        result.accept(gen, 1, false);
+        result.accept(gen, 0, false);
       }
     } catch (Exception e) {
       /* do cleanup here -- possibly rethrow e */

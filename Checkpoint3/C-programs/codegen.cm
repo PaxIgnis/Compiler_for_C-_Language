@@ -1,13 +1,12 @@
+
+int rec(int x) {
+    output(x);
+  if (x == 0) return x;
+  else return rec(x - 1);
+}
+
 void main(void) {
-  int x; int fac;
-
+  int x;
   x = input();
-  fac = 1;
-
-  while (x > 1) {
-    fac = fac * x;
-    x = x - 1;
-  } 
-
-  output(fac);
+  output(rec(x));
 }

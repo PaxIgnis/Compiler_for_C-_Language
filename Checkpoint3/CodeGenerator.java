@@ -27,8 +27,6 @@ public class CodeGenerator implements AbsynVisitor {
         this.table = new HashMap<String, ArrayList<NodeType>>();
     }
 
-
-
     public void visit(DecList decList, int offset, boolean isAddress) {
         clearFile();
 
@@ -125,6 +123,26 @@ public class CodeGenerator implements AbsynVisitor {
     @Override
     public void visit(IfExp exp, int level, boolean isAddr) {
         System.out.println("here3 IfExp");
+
+        emitComment("-> if");
+        level++;
+        if (exp.test != null) {
+            exp.test.accept(this, level, false);
+        }
+        int savedLoc = emitSkip(1);
+        emitComment("if: jump to else belongs here");
+
+        exp.thenpart.accept(this, level, false);
+        int savedLoc2 = emitSkip(0);
+        emitBackup(savedLoc);
+        emitRM_Abs("JEQ", 0, savedLoc2, "if: jmp to else");
+        emitRestore();
+        if (exp.elsepart != null) {
+            exp.elsepart.accept(this, level, false);
+        }
+        emitComment("<- if");
+
+        clearMapLevel(table, level);
         
     }
 
@@ -282,12 +300,23 @@ public class CodeGenerator implements AbsynVisitor {
                         + " column " + varDec.col);
             }
         }
-        // varDec.typ.accept(this, ++level, false);
     }
 
     @Override
-    public void visit(ArrayDec exp, int level, boolean isAddr) {
+    public void visit(ArrayDec varDec, int level, boolean isAddr) {
         System.out.println("here12 ArrayDec");
+
+        if (varDec.typ.typ == 0) {
+            // Add key to hash map at the current level
+            if (!table.containsKey(varDec.name)) {
+                table.put(varDec.name, new ArrayList<NodeType>());
+            }
+            addToHash(table, new NodeType(varDec.name, varDec, level));
+        }
+
+        level++;
+        varDec.typ.accept(this, level, false );
+        varDec.size.accept(this, level, false );
         
     }
 
@@ -320,8 +349,12 @@ public class CodeGenerator implements AbsynVisitor {
     }
 
     @Override
-    public void visit(IndexVar exp, int level, boolean isAddr) {
+    public void visit(IndexVar var, int level, boolean isAddr) {
         System.out.println("here14 IndexVar");
+
+        emitComment("-> subs");
+        // var.index.accept(this, ++level, false );
+        emitComment("<- subs");
         
     }
 
@@ -423,6 +456,13 @@ public class CodeGenerator implements AbsynVisitor {
 
     public void visit(ReturnExp exp, int level, boolean isAddr) {
         System.out.println("here19 ReturnExp");
+
+        emitComment("-> return");
+        if (!(exp.exp instanceof NilExp)) {
+           exp.exp.accept(this, ++level, false);
+        }
+        emitRM("LD", pc, -1, fp, "return to caller");
+        emitComment("<- return");
         
     }
 

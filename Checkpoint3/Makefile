@@ -24,20 +24,53 @@ parser.java: cminus.cup
 clean:
 	rm -f parser.java Lexer.java sym.java *.class absyn/*.class absyn/._* *~
 
-test1:
+#Test cases for AST generation (checkpoint 1)
+testAST1:
+	java -cp projects/java-cup-11b.jar:. CM -a C-programs/1.cm
+
+testAST2:
+	java -cp projects/java-cup-11b.jar:. CM -a C-programs/2.cm
+
+testAST3:
+	java -cp projects/java-cup-11b.jar:. CM -a C-programs/3.cm
+
+testAST4:
+	java -cp projects/java-cup-11b.jar:. CM -a C-programs/4.cm
+
+testAST5:
+	java -cp projects/java-cup-11b.jar:. CM -a C-programs/5.cm
+
+#Test cases for SYMbol table (checkpoint 2)
+testSYM1:
 	java -cp projects/java-cup-11b.jar:. CM -s C-programs/1.cm
 
-test2:
+testSYM2:
 	java -cp projects/java-cup-11b.jar:. CM -s C-programs/2.cm
 
-test3:
+testSYM3:
 	java -cp projects/java-cup-11b.jar:. CM -s C-programs/3.cm
 
-test4:
+testSYM4:
 	java -cp projects/java-cup-11b.jar:. CM -s C-programs/4.cm
 
-test5:
+testSYM5:
 	java -cp projects/java-cup-11b.jar:. CM -s C-programs/5.cm
+
+#Test cases for tm code generation (checkpoint 3)
+testTM1:
+	java -cp projects/java-cup-11b.jar:. CM -c C-programs/1.cm
+
+testTM2:
+	java -cp projects/java-cup-11b.jar:. CM -c C-programs/2.cm
+
+testTM3:
+	java -cp projects/java-cup-11b.jar:. CM -c C-programs/3.cm
+
+testTM4:
+	java -cp projects/java-cup-11b.jar:. CM -c C-programs/4.cm
+
+testTM5:
+	java -cp projects/java-cup-11b.jar:. CM -c C-programs/5.cm
 
 testCodeGen:
 	java -cp projects/java-cup-11b.jar:. CM -c C-programs/codegen.cm

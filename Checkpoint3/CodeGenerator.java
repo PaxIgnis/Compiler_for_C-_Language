@@ -109,7 +109,6 @@ public class CodeGenerator implements AbsynVisitor {
             emitRM("ST", ac, offset, fp, "op: push left");
             offset--;
         } else {
-            System.out.println("notsimplevar");
             exp.lhs.accept(this, level, false);
             offset--;
         }
@@ -329,20 +328,25 @@ public class CodeGenerator implements AbsynVisitor {
             emitComment("-> id");
             emitComment("looking up id: " + var.name);
             NodeType func = table.get(var.name).get(0);
-            SimpleDec dec = ((SimpleDec)func.def);
-            if (dec.nestLevel > 0) {
-                if (isAddr == true) {
-                    emitRM("LDA", 0, dec.offset, fp, "load id address");
+            if (func.def instanceof SimpleDec) {
+                SimpleDec dec = ((SimpleDec) func.def);
+                if (dec.nestLevel > 0) {
+                    if (isAddr == true) {
+                        emitRM("LDA", 0, dec.offset, fp, "load id address");
+                    } else {
+                        emitRM("LD", 0, dec.offset, fp, "load id value");
+                    }
                 } else {
-                    emitRM("LD", 0, dec.offset, fp, "load id value");
+                    if (isAddr == true) {
+                        emitRM("LDA", 0, dec.offset, gp, "load id address");
+                    } else {
+                        emitRM("LD", 0, dec.offset, gp, "load id value");
+                    }
                 }
             } else {
-                if (isAddr == true) {
-                    emitRM("LDA", 0, dec.offset, gp, "load id address");
-                } else {
-                    emitRM("LD", 0, dec.offset, gp, "load id value");
-                }
+                // Put array dec code here
             }
+            
             emitComment("<- id");
         }
         

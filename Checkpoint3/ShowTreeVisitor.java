@@ -3,6 +3,7 @@ import absyn.*;
 public class ShowTreeVisitor implements AbsynVisitor {
 
   final static int SPACES = 4;
+  public boolean errorFound = false;
 
   private void indent( int level ) {
     for( int i = 0; i < level * SPACES; i++ ) System.out.print( " " );
@@ -45,7 +46,8 @@ public class ShowTreeVisitor implements AbsynVisitor {
       exp.test.accept( this, level, false );
     } else {
       indent( level );
-      System.out.println("Invalid Expresion Statement");
+      System.err.println("Invalid Expresion Statement");
+      this.errorFound = true;
     }
     
     exp.thenpart.accept( this, level, false );
@@ -96,7 +98,8 @@ public class ShowTreeVisitor implements AbsynVisitor {
         System.out.println( " != " );
         break;
       default:
-        System.out.println( "Unrecognized operator at line " + exp.row + " and column " + exp.col);
+        System.err.println( "Unrecognized operator at line " + exp.row + " and column " + exp.col);
+        this.errorFound = true;
     }
     level++;
     exp.left.accept( this, level, false );
@@ -125,7 +128,8 @@ public class ShowTreeVisitor implements AbsynVisitor {
         System.out.println( " VOID " );
         break;
       default:
-        System.out.println( "Unrecognized type at line " + typ.row + " and column " + typ.col);
+        System.err.println( "Unrecognized type at line " + typ.row + " and column " + typ.col);
+        this.errorFound = true;
     }
   }
 
@@ -144,7 +148,7 @@ public class ShowTreeVisitor implements AbsynVisitor {
     indent( level );
     System.out.println( "CallExp: " + exp.func );
     if (exp.args != null)
-      exp.args.accept(this, ++level, false ); /* TODO: Might change */
+      exp.args.accept(this, ++level, false );
   }
 
   public void visit( WhileExp exp, int level, boolean isAddr ) {
@@ -175,9 +179,13 @@ public class ShowTreeVisitor implements AbsynVisitor {
     indent( level );
     System.out.println( "FunctionDec: " + dec.func );
     level++;
+    
     dec.result.accept(this, level, false );
     dec.params.accept(this, level, false );
-    dec.body.accept(this, level, false );
+    if (dec.body != null) {
+      dec.body.accept(this, level, false );
+    }
+    
   }
 
   public void visit( SimpleDec varDec, int level, boolean isAddr ) {

@@ -2,8 +2,7 @@
   provided by the professor. Function defs have been added.
   No errors should be shown for this file. 
 */
-void output(int a);
-int input(void);
+
 
 int x[10];
 

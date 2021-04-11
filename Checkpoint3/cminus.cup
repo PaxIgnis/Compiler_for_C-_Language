@@ -175,7 +175,7 @@ param_list     ::= param_list:p1 COM param:p2
                         }
                      :}
                   | param:p
-                     {: RESULT = new VarDecList(p, null); :} /* TODO: Put error detection below */
+                     {: RESULT = new VarDecList(p, null); :}
                   ;
 
 param          ::= type_specif:t ID:i
@@ -200,8 +200,7 @@ local_declar   ::= local_declar:l var_declar:v
                         }
                      :}
                   |
-                     {: RESULT = null; :} /* TODO: Fix null handling in absyn files
-                                             should this be new VarDecList(null, null)? */
+                     {: RESULT = null; :}
                   ;
 
 stmt_list      ::= stmt_list:s1 stmt:s2
@@ -234,7 +233,7 @@ stmt           ::= expr_stmt:e
 expr_stmt      ::= exp:e SEMI
                      {: RESULT = e; :}
                   | SEMI:s
-                     {: RESULT = new NilExp(sleft, sright); :} /* TODO: should this be simplified? */
+                     {: RESULT = new NilExp(sleft, sright); :}
                   ;
 
 selec_stmt     ::= IF:i LPAREN exp:e RPAREN stmt:s
@@ -256,7 +255,7 @@ iter_stmt      ::= WHILE:w LPAREN exp:e RPAREN stmt:s
 return_stmt    ::= RETURN:r exp:e SEMI
                      {: RESULT = new ReturnExp(rleft, rright, e); :}
                   | RETURN:r SEMI
-                     {: RESULT = new ReturnExp(rleft, rright, new NilExp(rleft, rright)); :} /* TODO: should null be passed instead of NilExp? */
+                     {: RESULT = new ReturnExp(rleft, rright, new NilExp(rleft, rright)); :}
                   ;
 
 exp            ::= var:v EQ exp:e
@@ -286,7 +285,7 @@ exp            ::= var:v EQ exp:e
                   | ID:i LPAREN arg_list:a RPAREN
                      {: RESULT = new CallExp(ileft, iright, i, a); :}
                   | ID:i LPAREN RPAREN
-                     {: RESULT = new CallExp(ileft, iright, i, null); :} /* TODO: is passing null the best solution? */
+                     {: RESULT = new CallExp(ileft, iright, i, null); :}
                   | NUM:n
                      {: RESULT = new IntExp(nleft, nright, n); :}
                   | var:v

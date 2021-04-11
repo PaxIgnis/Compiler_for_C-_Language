@@ -19,8 +19,10 @@ class CM {
   public static boolean SHOW_TREE = false;
   public static boolean SHOW_SYM = false;
   public static boolean SHOW_CODE = false;
-
+  public static boolean ASTError = false;
+  public static boolean SYMError = false;
   static public void main(String argv[]) {
+    
     String fileName;
     if (argv[0].equals("-a")) {
       SHOW_TREE = true;
@@ -30,7 +32,7 @@ class CM {
         /* prints out tree to file in same folder as source file */
         PrintStream o = new PrintStream(new File(fileName.replace(".cm", "") + ".abs"));
         System.setOut(o);
-        System.setErr(o);
+        // System.setErr(o);
       } catch (FileNotFoundException ex) {
         ex.printStackTrace();
       }
@@ -41,7 +43,7 @@ class CM {
         /* prints out tree to file in same folder as source file */
         PrintStream o = new PrintStream(new File(fileName.replace(".cm", "") + ".sym"));
         System.setOut(o);
-        System.setErr(o);
+        // System.setErr(o);
       } catch (FileNotFoundException ex) {
         ex.printStackTrace();
       }
@@ -67,19 +69,36 @@ class CM {
         result.accept(analyzer, 1, false);
         analyzer.printHash(analyzer.table, 1);
         System.out.println("Leaving the global scope");
-        // TESTING, print out symbol table
-        // analyzer.table.forEach((s, nodeList) -> {
-        //   Iterator<NodeType> i = nodeList.iterator();
-        //   while (i.hasNext()) {
-        //     NodeType n = i.next();
-        //     System.out.println("Type: " + n.def + " Name: " + n.name + " Level: " + n.level);
-        //   }
-        // });
       }
       if (SHOW_CODE && result != null) {
-        System.out.println("starting code generator");
-        CodeGenerator gen = new CodeGenerator(fileName.replace(".cm", "") + ".tm");
-        result.accept(gen, 0, false);
+       
+        PrintStream o = System.out;
+        System.setOut(new PrintStream(new OutputStream() {
+          public void write(int b) {}
+        }));
+        ShowTreeVisitor visitor = new ShowTreeVisitor();
+        result.accept(visitor, 0, false);
+        if (visitor.errorFound == true) {
+          ASTError = true;
+        }
+        SemanticAnalyzer analyzer = new SemanticAnalyzer();
+        result.accept(analyzer, 1, false);
+        analyzer.printHash(analyzer.table, 1);
+        if (analyzer.errorFound == true) {
+          SYMError = true;
+        }
+        System.setOut(o);
+
+        if (ASTError == true) {
+          System.err.println("Error(s) found when generating the AST, cannot continue.");
+        } else if (SYMError == true) {
+          System.err.println("Error(s) found when generating symbol table/type checking, cannot continue.");
+        } else {
+          System.out.println("starting code generator");
+          CodeGenerator gen = new CodeGenerator(fileName.replace(".cm", "") + ".tm");
+          result.accept(gen, 0, false);
+        }
+        
       }
     } catch (Exception e) {
       /* do cleanup here -- possibly rethrow e */

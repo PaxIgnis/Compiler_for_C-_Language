@@ -5,6 +5,8 @@ public class SemanticAnalyzer implements AbsynVisitor {
     HashMap<String, ArrayList<NodeType>> table;
     final static int SPACES = 4;
     private String currentFunc = "";
+    public boolean errorFound = false;
+    boolean returned = false;
 
     public SemanticAnalyzer() {
         this.table = new HashMap<String, ArrayList<NodeType>>();
@@ -23,6 +25,15 @@ public class SemanticAnalyzer implements AbsynVisitor {
     }
 
     public void visit(DecList decList, int level, boolean isAddr) {
+        // add input function to hashmap
+        table.put("input", new ArrayList<NodeType>());
+        VarDecList params = new VarDecList(new SimpleDec(0, 0, new NameTy(0, 0, NameTy.VOID), ""), null);
+        addToHash(table, new NodeType("input", new FunctionDec(0, 0, new NameTy(0, 0, NameTy.INT), "input", params, null, 4), 0));
+
+        // add output function to hashmap
+        table.put("output", new ArrayList<NodeType>());
+        params = new VarDecList(new SimpleDec(0, 0, new NameTy(0, 0, NameTy.INT), "a"), null);
+        addToHash(table, new NodeType("output", new FunctionDec(0, 0, new NameTy(0, 0, NameTy.VOID), "output", params, null, 7), 0));
         while (decList != null) {
             decList.head.accept(this, level, false);
             decList = decList.tail;
@@ -42,7 +53,8 @@ public class SemanticAnalyzer implements AbsynVisitor {
         exp.rhs.accept(this, level, false);
         // exp is of type CallExp, OpExp, VarExp
         if (getType(exp.lhs) != getType(exp.rhs)) {
-            System.out.println("Error, assignment types do not match at: row "+exp.row+" column "+exp.col);
+            System.err.println("Error, assignment types do not match at: row "+exp.row+" column "+exp.col);
+            errorFound = true;
         }
     }
 
@@ -53,10 +65,12 @@ public class SemanticAnalyzer implements AbsynVisitor {
         if (exp.test != null) {
             exp.test.accept(this, level, false);
             if (getType(exp.test) != 0) {
-                System.out.println("Error, test condition for if stmt must be of type int at: row "+exp.row+" column "+exp.col);
+                System.err.println("Error, test condition for if stmt must be of type int at: row "+exp.row+" column "+exp.col);
+                errorFound = true;
             }
         } else {
-            System.out.println("Error, no test condition for if stmt at: row "+exp.row+" column "+exp.col);
+            System.err.println("Error, no test condition for if stmt at: row "+exp.row+" column "+exp.col);
+            errorFound = true;
         }
 
         exp.thenpart.accept(this, level, false);
@@ -76,7 +90,8 @@ public class SemanticAnalyzer implements AbsynVisitor {
         exp.left.accept(this, level, false);
         exp.right.accept(this, level, false);
         if (getType(exp.left) != getType(exp.right)) {
-            System.out.println("Error, operand types do not match at: row "+exp.row+" column "+exp.col);
+            System.err.println("Error, operand types do not match at: row "+exp.row+" column "+exp.col);
+            errorFound = true;
         }
     }
 
@@ -92,7 +107,8 @@ public class SemanticAnalyzer implements AbsynVisitor {
 
     public void visit(SimpleVar var, int level, boolean isAddr) {
         if (!table.containsKey(var.name)) {
-            System.out.println("Error, use of undefined variable '"+var.name+"' at: row "+var.row+" column "+var.col);
+            System.err.println("Error, use of undefined variable '"+var.name+"' at: row "+var.row+" column "+var.col);
+            errorFound = true;
         }
     }
 
@@ -100,46 +116,54 @@ public class SemanticAnalyzer implements AbsynVisitor {
         var.index.accept(this, ++level, false);
         // check if index is of int type
         if (!table.containsKey(var.name)) {
-            System.out.println("Error, use of undefined array variable '" + var.name + "[]' at: row " + var.row
+            System.err.println("Error, use of undefined array variable '" + var.name + "[]' at: row " + var.row
                     + " column " + var.col);
+            errorFound = true;
         } else {
             if (var.index instanceof IntExp) {
             } else if (var.index instanceof VarExp || var.index instanceof CallExp) {
                 if (var.index instanceof CallExp) {
                     if (!table.containsKey(((CallExp) var.index).func)) {
-                        System.out.println("Error, array index has undefined function '" + var.name + "[]' at: row "
+                        System.err.println("Error, array index has undefined function '" + var.name + "[]' at: row "
                                 + var.row + " column " + var.col);
+                        errorFound = true;
                     } else {
                         if (!isInteger(((CallExp) var.index).func)) {
-                            System.out.println("Error, array index must be of type int '" + var.name + "[]' at: row "
+                            System.err.println("Error, array index must be of type int '" + var.name + "[]' at: row "
                                 + var.row + " column " + var.col);
+                            errorFound = true;
                         }
                     }
                 } else if (((VarExp) var.index).variable instanceof SimpleVar) {
 
                     if (!table.containsKey(((SimpleVar)((VarExp) var.index).variable).name)) {
-                        System.out.println("Error, array index has undefined function '" + var.name + "[]' at: row "
+                        System.err.println("Error, array index has undefined function '" + var.name + "[]' at: row "
                                 + var.row + " column " + var.col);
+                        errorFound = true;
                     } else {
                         if (!isInteger(((SimpleVar)((VarExp) var.index).variable).name)) {
-                            System.out.println("Error, array index must be of type int '" + var.name + "[]' at: row "
+                            System.err.println("Error, array index must be of type int '" + var.name + "[]' at: row "
                                 + var.row + " column " + var.col);
+                            errorFound = true;
                         }
                     }
                 } else if (((VarExp) var.index).variable instanceof IndexVar) {
                     if (!table.containsKey(((IndexVar)((VarExp) var.index).variable).name)) {
-                        System.out.println("Error, array index has undefined function '" + var.name + "[]' at: row "
+                        System.err.println("Error, array index has undefined function '" + var.name + "[]' at: row "
                                 + var.row + " column " + var.col);
+                        errorFound = true;
                     } else {
                         if (!isInteger(((IndexVar)((VarExp) var.index).variable).name)) {
-                            System.out.println("Error, array index must be of type int '" + var.name + "[]' at: row "
+                            System.err.println("Error, array index must be of type int '" + var.name + "[]' at: row "
                                 + var.row + " column " + var.col);
+                            errorFound = true;
                         }
                     }
                 }
             } else {
-                System.out.println("Error, array index must be of type int '" + var.name + "[]' at: row " + var.row
+                System.err.println("Error, array index must be of type int '" + var.name + "[]' at: row " + var.row
                         + " column " + var.col);
+                errorFound = true;
             }
         }
     }
@@ -148,11 +172,13 @@ public class SemanticAnalyzer implements AbsynVisitor {
         if (exp.args != null)
             exp.args.accept(this, ++level, false);
         if (!table.containsKey(exp.func)) {
-            System.out.println("Error, use of undefined function '"+exp.func+"[]' at: row "+exp.row+" column "+exp.col);
+            System.err.println("Error, use of undefined function '"+exp.func+"[]' at: row "+exp.row+" column "+exp.col);
+            errorFound = true;
         } else {
             NodeType func = table.get(exp.func).get(0);
             if (func == null) {
-                System.out.println("Error, use of undefined function '"+exp.func+"[]' at: row "+exp.row+" column "+exp.col);
+                System.err.println("Error, use of undefined function '"+exp.func+"[]' at: row "+exp.row+" column "+exp.col);
+                errorFound = true;
             } else {
                 VarDecList paramL = ((FunctionDec) func.def).params;
                 String params = "";
@@ -162,13 +188,15 @@ public class SemanticAnalyzer implements AbsynVisitor {
                         if (paramL.head instanceof SimpleDec) {
                             params += (((SimpleDec) paramL.head).typ.typ == 0 ? " INT" : " VOID");
                             if (getType(args.head) != ((SimpleDec) paramL.head).typ.typ) {
-                                System.out.println("Error, incorrect params in function call '"+exp.func+"[]' at: row "+exp.row+" column "+exp.col);
+                                System.err.println("Error, incorrect params in function call '"+exp.func+"[]' at: row "+exp.row+" column "+exp.col);
+                                errorFound = true;
                                 break;
                             }
                         } else if (paramL.head instanceof ArrayDec) {
                             params += (((ArrayDec) paramL.head).typ.typ == 0 ? " INT[]" : " VOID[]");
                             if (getType(args.head) != ((ArrayDec) paramL.head).typ.typ) {
-                                System.out.println("Error, incorrect params in function call '"+exp.func+"[]' at: row "+exp.row+" column "+exp.col);
+                                System.err.println("Error, incorrect params in function call '"+exp.func+"[]' at: row "+exp.row+" column "+exp.col);
+                                errorFound = true;
                                 break;
                             }
                         }
@@ -177,14 +205,16 @@ public class SemanticAnalyzer implements AbsynVisitor {
                         
                         if (args == null) {
                             if (paramL != null) {
-                                System.out.println("Error, incorrect params in function call '"+exp.func+"[]' at: row "+exp.row+" column "+exp.col);
+                                System.err.println("Error, incorrect params in function call '"+exp.func+"[]' at: row "+exp.row+" column "+exp.col);
+                                errorFound = true;
                             }
                             break;
                         }
                     }
                 } else if ((paramL != null && exp.args == null) || (paramL == null && exp.args != null)) {
                     if (paramL == null && !params.equals("VOID")) {
-                        System.out.println("Error, incorrect params in function call '"+exp.func+"[]' at: row "+exp.row+" column "+exp.col);
+                        System.err.println("Error, incorrect params in function call '"+exp.func+"[]' at: row "+exp.row+" column "+exp.col);
+                        errorFound = true;
                     }
                 }
             }
@@ -199,7 +229,8 @@ public class SemanticAnalyzer implements AbsynVisitor {
         exp.body.accept(this, level, false);
         printHash(table, level);
         if (getType(exp.test) != 0) {
-            System.out.println("Error, test condition for while loop must be of type int at: row "+exp.row+" column "+exp.col);
+            System.err.println("Error, test condition for while loop must be of type int at: row "+exp.row+" column "+exp.col);
+            errorFound = true;
         }
         indent(level - 1);
         System.out.println("Leaving while block");
@@ -209,12 +240,15 @@ public class SemanticAnalyzer implements AbsynVisitor {
     public void visit(ReturnExp exp, int level, boolean isAddr) {
         if (exp.exp instanceof NilExp) {
             if (isInteger(currentFunc)) {
-                System.out.println("Error, mismatched return type, should be void '"+currentFunc+"[]' at: row "+exp.row+" column "+exp.col);
+                System.err.println("Error, mismatched return type, should be void '"+currentFunc+"[]' at: row "+exp.row+" column "+exp.col);
+                errorFound = true;
             }
         } else {
+            returned = true;
             exp.exp.accept(this, ++level, false);
             if (!(getType(exp.exp) == 0 && isInteger(currentFunc)) && !(getType(exp.exp) == 1 && !isInteger(currentFunc))) {
-                System.out.println("Error, mismatched return type '"+currentFunc+"[]' at: row "+exp.row+" column "+exp.col);
+                System.err.println("Error, mismatched return type '"+currentFunc+"[]' at: row "+exp.row+" column "+exp.col);
+                errorFound = true;
             }
         }
     }
@@ -238,6 +272,7 @@ public class SemanticAnalyzer implements AbsynVisitor {
         level++;
         currentFunc = dec.func;
         dec.params.accept(this, level, false);
+        returned = false;
         if (dec.body != null) {
             dec.body.accept(this, level, false);
         }
@@ -245,7 +280,12 @@ public class SemanticAnalyzer implements AbsynVisitor {
         printHash(table, level);
         indent(level - 1);
         System.out.println("Leaving the function scope");
-        // dec.result.accept(this, level);
+
+        if (returned == false && dec.result.typ == 0) {
+            System.err.println("Error, Function(" + dec.func + ") of return type int doesn't have return statement");
+            errorFound = true;
+        }
+        returned = false;
         // clears all items from inner scopes
         clearMapLevel(table, level);
         
@@ -258,11 +298,11 @@ public class SemanticAnalyzer implements AbsynVisitor {
                 if (!table.containsKey(varDec.name)) {
                     table.put(varDec.name, new ArrayList<NodeType>());
                 }
-                // table.get(varDec.name).add(new NodeType(varDec.name, varDec, level));
                 addToHash(table, new NodeType(varDec.name, varDec, level));
             } else {
-                System.out.println("Error, variable cannot be void '" + varDec.name + "' at: row " + varDec.row
+                System.err.println("Error, variable cannot be void '" + varDec.name + "' at: row " + varDec.row
                         + " column " + varDec.col);
+                errorFound = true;
             }
 
         }
@@ -275,11 +315,11 @@ public class SemanticAnalyzer implements AbsynVisitor {
             if (!table.containsKey(varDec.name)) {
                 table.put(varDec.name, new ArrayList<NodeType>());
             }
-            // table.get(varDec.name).add(new NodeType(varDec.name, varDec, level));
             addToHash(table, new NodeType(varDec.name, varDec, level));
         } else {
-            System.out.println("Error, array variable cannot be void '" + varDec.name + "[]' at: row " + varDec.row + " column "
+            System.err.println("Error, array variable cannot be void '" + varDec.name + "[]' at: row " + varDec.row + " column "
                     + varDec.col);
+            errorFound = true;
         }
     }
 
@@ -340,8 +380,9 @@ public class SemanticAnalyzer implements AbsynVisitor {
         while (i.hasNext()) {
             NodeType n = i.next();
             if (n.level == node.level) {
-                System.out.println("Error, double declaration at: row " + node.def.row + ", column " + node.def.col
+                System.err.println("Error, double declaration at: row " + node.def.row + ", column " + node.def.col
                         + ". Initial declaration at: row " + n.def.row + ", column " + n.def.col + ".");
+                errorFound = true;
                 return;
             }
         }

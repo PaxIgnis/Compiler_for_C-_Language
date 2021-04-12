@@ -17,6 +17,10 @@ To test the parser w/o AST: java -cp projects/java-cup-11b.jar:. CM C-programs/g
 To test the parser with AST: java -cp projects/java-cup-11b.jar:. CM -a C-programs/gcd.cm
 (the AST will be in a file: C-programs/gcd.abs)
 
+To run code on the TM simulator, type cd TMSimulator to get into the folder,
+then type make to build it, and then type test[0-9] to use the make shortcut 
+to run the generated files from the C-programs folder.
+
 ****
 Test Files
 ****

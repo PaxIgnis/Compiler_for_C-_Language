@@ -22,7 +22,7 @@ parser.java: cminus.cup
 	$(CUP) -expect 3 cminus.cup
 
 clean:
-	rm -f parser.java Lexer.java sym.java *.class absyn/*.class absyn/._* *~
+	rm -f parser.java Lexer.java sym.java *.class absyn/*.class absyn/._* *~ C-programs/*.sym C-programs/*.abs C-programs/*.tm
 
 #Test cases for AST generation (checkpoint 1)
 testAST1:

@@ -1,88 +1,118 @@
 Hendrik van der Meijden
 CIS4650 W21
-March, 2021
+April, 2021
 
 The program requires jFlex to be installed, and available as a PATH variable. 
 The CUP jar is provided in the submission and does not need to be installed. 
 To make the program just type ‘make’.
 
-To test the test files for symbol/type-checking, use make. So to test 1.cm type: make test1
+To  run the test files use the shortcuts from the makefile, which are testAST[0-9], testSYM[0-9], and testTM[0-9].
+
+If you want to test other files here are the commands:
+
+To test the tm code generation use: java -cp projects/java-cup-11b.jar:. CM -c C-programs/gcd.cm
 To test the symbol table and type-checking use: java -cp projects/java-cup-11b.jar:. CM -s C-programs/gcd.cm
 To test the Scanner use: java -cp projects/java-cup-11b.jar:. Scanner < C-programs/gcd.cm
 To test the parser w/o AST: java -cp projects/java-cup-11b.jar:. CM C-programs/gcd.cm
 To test the parser with AST: java -cp projects/java-cup-11b.jar:. CM -a C-programs/gcd.cm
 (the AST will be in a file: C-programs/gcd.abs)
 
+****
+Test Files
+****
+Test files 1-4 are error free and demonstrate different functionality for the 
+tm code generation.
+
+Test files 5-8 have different errors, most of which will be seen by testing the 
+syntax and type checking test cases.
+
+Test file 9 is error free and shows more functionality of the tm code generation.
+
+Test file 0 demonstrated return error catching by the type checker.
+
 ***********************************************
 The report is below here as an alternate format the the pdf.
 ******
 
-Checkpoint 2 Report
+Checkpoint 3 Final Report
 
-Symbol Table
+TM Simulator Code Generation
 
-The symbol table was made using a hashmap, with the keys being the names of the variable/function 
-declarations and the values being arraylists of nodes. These nodes keep track of the type of declaration 
-and the level or scope that the declaration was made in. The first step was creating the new class 
-NodeType that would store the levels and declarations. Then create a new visitor class SemanticAnalyzer 
-that would do the processing and creation of the symbol table. The next step was to add declarations too 
-the hashmap, and this was done in the declaration sections for function, simple variable and array variable. 
-The logic simply checks if the declaration (key) is already in the hashmap, and if not it adds it too the 
-hashmap. Then it checks if a nodetype is already in the hashmap with the same key and same level. 
-If this is the case then there has been a double declaration in the same scope, and an error is thrown. 
-If a value does not exists with the same level, then a new node is added to the arraylist for the key.
-The level or scope increases in a few cases, such as functions, while loops, for loops and if statements. 
-When leaving the scope (i.e. at the end of the function) all of the declarations made in the inner 
-scopes are removed from the hashmap as they are no longer visible to the rest of the code.
-It is at the end of processing for a scope, right before returning the parent scope that the elements 
-in this scope are printed to the screen. If a scope does not have any declarations it is still printed 
-to the screen that the scope has been entered and exited. And because of using post-order traversal, all 
-of the inner scope information is printed out first before the declarations from the outer scopes.
-The actual printout of the symbol table includes indentation to better keep track of the 
-different scope levels. The variables are printed out with their types, and the array variables 
-are printed out with their types and the size of array (if provided during declaration). 
-The function declarations are printed out with their return types and the parameter types 
-(but not parameter var names). It is printed out when a scope is entered and exited.
-If a value is redefined in the same scope then an error is displayed saying the value 
-is being redefined, and shows the location of the error and the location of the initial declaration.
-If a value is used that has not yet been defined, an error is displayed.
-Function definitions have been added to the grammar, but they are not printed out when displaying 
-the symbol table as this would be redundant as no declarations can be made in the definition.
-
-Type Checking
-
-Array index is checked to make sure it is of type int, if not an error is printed out. 
-This includes checking if the index is a function, and ensuring that the function has been defined 
-and that the function returns an int. Type checking for the variable declarations was added, 
-ensuring that simple variables and array variables cannot be of type int.
-The next step was type checking for matching two sides of an assignment. This works recursively, 
-so if an assignment is used in another assignment, it will not break the system.
-The next step was type checking for matching two operands. The grammar picks two values at a time 
-for operand operations, and if any two are not of the same type, then an error is thrown.
-The next step was type checking for return types of functions. So checking that void functions 
-only return void and int functions only return int types.
-The next step involved checking that the parameters used in functions calls matched up with the 
-correct types that were in the function definitions. And that the correct number of parameters also matched.
-The next step involved checking that the test conditions for if and while statements were of type 
-int (and it was assumed that Boolean type operations could be considered as binary). If they did 
-not satisfy this condition than an error was thrown.
+I tried to follow the incremental development plan as set out in the lecture slides for this checkpoint. 
+Initially I tried to implement the basic code structure for the foundation, so I added the prelude code 
+generation, the jump around the i/o functions, and the code for the input and output functions, and the 
+finale. Then after I got this to look exactly like the sample output code from fac.cm (with respect to the 
+final and prelude and other setup stuff) then I added the code for the function declaration, and then tested 
+it with an empty main function. I needed to add a value to the function declaration to keep track of the 
+address, so the jump code could make use of that. I decided to implement a hashmap to keep track of these 
+declarations and their scopes, similarly to how I used it in checkpoint 2. After the empty function looked 
+like the example from the lecture slides, I added a simple int declaration, and added the code generation 
+to the VarDecList and SimpleDec. Then I added a simple assignment to that int. Then added code for expressions. 
+I added call expressions and tested it using input and output functions, and this worked when tested in the 
+tm machine. And at this point the test file 1.cm worked, which uses declarations, assignment, call expressions 
+and the input/output functions.
+I then added OpExp functionality, following examples from gcd and fac. Then added functionality for while loops, 
+and at this stage I had all of the parts required to test the fac.cm provided code, so I compared all 69 instructions 
+with the provided fac.tm and every instruction was identical. And test file 2.cm is the code from the fac example, 
+which uses declarations, assignment, while loops and op expressions (greater than, subtraction and multiplication).
+Then I added if expression functionality, followed by return expression functionality. 
+At this point I had implemented all of the required functionality to test out the provided gcd program. 
+So the test file 3.cm shows this functionality by using the gcd example code. This test file demonstrates 
+the working functionality for global variable declarations, multiple function declarations, recursive function calls, 
+chained op expressions (like u – u/v*v), assignment, input/output functions, if statements and function returns.
+And the final test file for error free code, 4.cm is an example showing that nested blocks within functions is 
+properly working. It shows that a variable that is redeclared inside of the nested block is properly stored and accessed.
+I did not get to implementing the array declarations or the index vars for those declarations.
 
 Flags
 
-The ‘-s’ flag has been added. This is used to print out the symbol table to the <filename>.sym file. 
-As per the spec, only a single flag can be used at a time. The flag options currently are ‘-a’ for the 
-AST and ‘-s’ for the symbol table.
+The three flags are: ‘a’ for the AST, ‘s’ for the syntax tree and ‘c’ for the code generation. 
+The ‘-a’ flag is used to print out the ast to the <filename>.abs file. 
+The ‘-s’ flag is used to print out the symbol table to the <filename>.sym file. 
+The ‘-d’ flag is used to print out the generated code to the <filename>.tm file. 
+As per the spec, only a single flag can be used at a time.
+
 Assumptions and Limitations and Possible Improvements
-•	It is assumed that if a file is correctly formatted without any errors it will always produce a correct 
-syntax tree.
+
+•	It is assumed that if a file is correctly formatted without any errors it will always produce a correct syntax tree.
 •	It is assumed that the program is run on a linux device, if not then the makefile may require some changes.
-•	The ‘-a’ flag has been implemented, which means that if a user does not pass this flag, then the AST will 
-not be generated, but the parsing will proceed. If this flag is passed in, then the AST will be created and
- all of the output from the program will be sent to a file with the same name as the provided file, except 
- the ‘.cm.’ will be replaced with ‘.abs’.
+•	The ‘-a’ flag has been implemented, which means that if a user does not pass this flag, then the AST will not be generated, 
+but the parsing will proceed. If this flag is passed in, then the AST will be created and all of the output from the program 
+will be sent to a file with the same name as the provided file, except the ‘.cm.’ will be replaced with ‘.abs’. And likewise 
+for both the ‘s’ and ‘c’ flags)
 •	It is assumed that all input files will have the suffix ‘.cm’
-•	The provided c minus sample files are provided in the folder ‘C-programs’, and the output AST and sym 
-files will also be in this folder.
+•	The provided c minus sample files are provided in the folder ‘C-programs’, and the output files will also be in this folder.
+•	Arrays and Index variables have not been implemented for the tm code generation, and thus the limitation stands that any files 
+that have arrays or index vars will not produce working code. There was not enough time to implement this feature, but if there 
+was more time than it could have been added.
+•	Checking int functions for return statements currently implements a simple check, but it could be improved with a more rigorous 
+check to ensure that no code comes after the last return statement.
+•	Errors are printed to the std err, and all other output is sent to the relative file.
+•	When generating code, the program first does a syntax and grammar check, and if there are errors, then an the code is not 
+generated and an error is printed to std err.
+
+What I learned
+
+•	I learned how important it was to follow the incremental development plan laid out in the lecture slides.
+•	I learned how to use the assembly instructions for the tm simulator and how this is quite similar to the 68k work I did in CIS2030.
+•	I learned how much of a nightmare it is to end up with an offset off by one, and try to figure out where the problem stems from.
+•	I learned about backpatching, and how to use this.
+•	I learned about the calling sequence for functions and the like.
+•	I learned new respect for all the compiler programmers out there who code in assembly as an area of expertise.
+
+Building
+
+The program requires jFlex to be installed, and available as a PATH variable. The CUP jar is provided in the submission 
+and does not need to be installed. To make the program just type ‘make’. 
+To  run the test files use the shortcuts from the makefile, which are testAST[0-9], testSYM[0-9], and testTM[0-9].
+If you want to test other files here are the commands:
+To test the tm code generation use: java -cp projects/java-cup-11b.jar:. CM -c C-programs/gcd.cm
+
+To test the symbol table and type-checking use: java -cp projects/java-cup-11b.jar:. CM -s C-programs/gcd.cm
+To test the Scanner use: java -cp projects/java-cup-11b.jar:. Scanner < C-programs/gcd.cm
+To test the parser w/o AST: java -cp projects/java-cup-11b.jar:. CM C-programs/gcd.cm
+To test the parser with AST: java -cp projects/java-cup-11b.jar:. CM -a C-programs/gcd.cm
+
 
 
 

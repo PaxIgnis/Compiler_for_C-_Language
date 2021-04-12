@@ -2,7 +2,6 @@ import absyn.*;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 public class CodeGenerator implements AbsynVisitor {
@@ -20,6 +19,7 @@ public class CodeGenerator implements AbsynVisitor {
     final int initFO = -2;
     String filename;
     String currentFunc = "";
+    final boolean DEBUG = false;
 
 
     public CodeGenerator(String filename) {
@@ -90,18 +90,18 @@ public class CodeGenerator implements AbsynVisitor {
 
     }
 
-    @Override
+    
     public void visit(ExpList expList, int level, boolean isAddr) {
-        System.out.println("here1 ExpList");
+        if (DEBUG == true) System.out.println(offset +"   here1 ExpList");
         while (expList != null) {
             expList.head.accept(this, level, false);
             expList = expList.tail;
         }
     }
 
-    @Override
+    
     public void visit(AssignExp exp, int level, boolean isAddr) {
-        System.out.println("here2 AssignExp");
+        if (DEBUG == true) System.out.println(offset +"   here2 AssignExp");
 
         emitComment("-> op");
         if (exp.lhs.variable instanceof SimpleVar) {
@@ -119,10 +119,10 @@ public class CodeGenerator implements AbsynVisitor {
         emitComment("<- op");
     }
 
-    @Override
+    
     public void visit(IfExp exp, int level, boolean isAddr) {
-        System.out.println("here3 IfExp");
-
+        if (DEBUG == true) System.out.println(offset +"   here3 IfExp");
+        int tmpOffset = offset;
         emitComment("-> if");
         level++;
         if (exp.test != null) {
@@ -140,22 +140,22 @@ public class CodeGenerator implements AbsynVisitor {
             exp.elsepart.accept(this, level, false);
         }
         emitComment("<- if");
-
+        offset = tmpOffset;
         clearMapLevel(table, level);
         
     }
 
-    @Override
+    
     public void visit(IntExp exp, int level, boolean isAddr) {
-        System.out.println("here4 IntExp");
+        if (DEBUG == true) System.out.println(offset +"   here4 IntExp");
         emitComment("-> constant");
         emitRM("LDC", ac, Integer.parseInt(exp.value), 0, "load const");
         emitComment("<- constant");
     }
 
-    @Override
+    
     public void visit(OpExp exp, int level, boolean isAddr) {
-        System.out.println("here5 OpExp");
+        if (DEBUG == true) System.out.println(offset +"   here5 OpExp");
         
         emitComment("-> op");
 
@@ -240,28 +240,28 @@ public class CodeGenerator implements AbsynVisitor {
           emitComment("<- op");
     }
 
-    @Override
+    
     public void visit(VarExp exp, int level, boolean isAddr) {
-        System.out.println("here6 VarExp");
+        if (DEBUG == true) System.out.println(offset +"   here6 VarExp");
         exp.variable.accept(this, ++level, isAddr );
         
     }
 
-    @Override
+    
     public void visit(NilExp exp, int level, boolean isAddr) {
-        System.out.println("here7 NilExp");
+        if (DEBUG == true) System.out.println(offset +"   here7 NilExp");
         
     }
 
-    @Override
+    
     public void visit(NameTy exp, int level, boolean isAddr) {
-        System.out.println("here8 NameTy");
+        if (DEBUG == true) System.out.println(offset +"   here8 NameTy");
         
     }
 
-    @Override
+    
     public void visit(VarDecList varDecList, int level, boolean isAddr) {
-        System.out.println("here10 VarDecList");
+        if (DEBUG == true) System.out.println(offset +"   here10 VarDecList");
         while (varDecList != null) {
             varDecList.head.accept(this, level, isAddr);
             varDecList = varDecList.tail;
@@ -269,9 +269,9 @@ public class CodeGenerator implements AbsynVisitor {
         
     }
 
-    @Override
+    
     public void visit(SimpleDec varDec, int level, boolean isAddr) {
-        System.out.println("here11 SimpleDec");
+        if (DEBUG == true) System.out.println(offset +"   here11 SimpleDec");
         if (!varDec.name.isEmpty()) {
             if (varDec.typ.typ == 0) {
                 // Add key to hash map at the current level
@@ -301,9 +301,9 @@ public class CodeGenerator implements AbsynVisitor {
         }
     }
 
-    @Override
+    
     public void visit(ArrayDec varDec, int level, boolean isAddr) {
-        System.out.println("here12 ArrayDec");
+        if (DEBUG == true) System.out.println(offset +"   here12 ArrayDec");
 
         if (varDec.typ.typ == 0) {
             // Add key to hash map at the current level
@@ -319,15 +319,15 @@ public class CodeGenerator implements AbsynVisitor {
         
     }
 
-    @Override
+    
     public void visit(SimpleVar var, int level, boolean isAddr) {
-        System.out.println("here13 SimpleVar");
+        if (DEBUG == true) System.out.println(offset +"   here13 SimpleVar");
         if (!table.containsKey(var.name)) {
             System.err.println("Error, use of undefined variable '"+var.name+"' at: row "+var.row+" column "+var.col);
         } else {
             emitComment("-> id");
             emitComment("looking up id: " + var.name);
-            NodeType func = table.get(var.name).get(0);
+            NodeType func = table.get(var.name).get(table.get(var.name).size()-1);
             if (func.def instanceof SimpleDec) {
                 SimpleDec dec = ((SimpleDec) func.def);
                 if (dec.nestLevel > 0) {
@@ -352,9 +352,9 @@ public class CodeGenerator implements AbsynVisitor {
         
     }
 
-    @Override
+    
     public void visit(IndexVar var, int level, boolean isAddr) {
-        System.out.println("here14 IndexVar");
+        if (DEBUG == true) System.out.println(offset +"   here14 IndexVar");
 
         emitComment("-> subs");
         // var.index.accept(this, ++level, false );
@@ -362,9 +362,9 @@ public class CodeGenerator implements AbsynVisitor {
         
     }
 
-    @Override
+    
     public void visit(CompoundExp exp, int level, boolean isAddr) {
-        System.out.println("here15 CompountExp");
+        if (DEBUG == true) System.out.println(offset +"   here15 CompountExp");
         emitComment("-> compound statement");
         if (exp.decs != null)
             exp.decs.accept(this, level, false);
@@ -373,9 +373,9 @@ public class CodeGenerator implements AbsynVisitor {
         emitComment("<- compound statement");
     }
 
-    @Override
+    
     public void visit(FunctionDec dec, int level, boolean isAddr) {
-        System.out.println("here16 functiondec");
+        if (DEBUG == true) System.out.println(offset +"   here16 functiondec");
         if (!table.containsKey(dec.func)) {
             table.put(dec.func, new ArrayList<NodeType>());
         }
@@ -406,12 +406,12 @@ public class CodeGenerator implements AbsynVisitor {
         
     }
 
-    @Override
+    
     public void visit(CallExp exp, int level, boolean isAddr) {
         if (!table.containsKey(exp.func)) {
-            System.out.println("Error, use of undefined function '"+exp.func+"[]' at: row "+exp.row+" column "+exp.col);
+            System.err.println("Error, use of undefined function '"+exp.func+"[]' at: row "+exp.row+" column "+exp.col);
         } else {
-            System.out.println("here17 CallExp");
+            if (DEBUG == true) System.out.println(offset +"   here17 CallExp");
 
             int curFO = initFO;
             NodeType func = table.get(exp.func).get(0);
@@ -437,9 +437,9 @@ public class CodeGenerator implements AbsynVisitor {
         
     }
 
-    @Override
+    
     public void visit(WhileExp exp, int level, boolean isAddr) {
-        System.out.println("here18 WhileExp");
+        if (DEBUG == true) System.out.println(offset +"   here18 WhileExp");
         emitComment("-> while");
         emitComment("while: jump after body comes back here");
         int savedLoc = emitSkip(0);
@@ -459,7 +459,7 @@ public class CodeGenerator implements AbsynVisitor {
     }
 
     public void visit(ReturnExp exp, int level, boolean isAddr) {
-        System.out.println("here19 ReturnExp");
+        if (DEBUG == true) System.out.println(offset +"   here19 ReturnExp");
 
         emitComment("-> return");
         if (!(exp.exp instanceof NilExp)) {
@@ -565,12 +565,12 @@ public class CodeGenerator implements AbsynVisitor {
                     
                     if (n.def instanceof SimpleDec) {
                         type = ((SimpleDec) n.def).typ.typ;
-                        System.out.println(n.name + ": " + (type == 0 ? "INT" : "VOID"));
+                        System.err.println(n.name + ": " + (type == 0 ? "INT" : "VOID"));
                     } else if (n.def instanceof ArrayDec) {
                         type = ((ArrayDec) n.def).typ.typ;
                         String arraySize = ((ArrayDec) n.def).size.value.equals("0") ? ""
                                 : ((ArrayDec) n.def).size.value;
-                        System.out.println(n.name + "[" + arraySize + "]: " + (type == 0 ? "INT" : "VOID"));
+                        System.err.println(n.name + "[" + arraySize + "]: " + (type == 0 ? "INT" : "VOID"));
                     } else if (n.def instanceof FunctionDec) {
                         type = ((FunctionDec) n.def).result.typ;
                         String params = "";
@@ -588,7 +588,7 @@ public class CodeGenerator implements AbsynVisitor {
                             params += " ";
                         }
 
-                        System.out.println(n.name + ": " + "(" + params + ") -> " + (type == 0 ? "INT" : "VOID"));
+                        System.err.println(n.name + ": " + "(" + params + ") -> " + (type == 0 ? "INT" : "VOID"));
                     }
                 }
             }
@@ -612,7 +612,7 @@ public class CodeGenerator implements AbsynVisitor {
         while (i.hasNext()) {
             NodeType n = i.next();
             if (n.level == node.level) {
-                System.out.println("Error, double declaration at: row " + node.def.row + ", column " + node.def.col
+                System.err.println("Error, double declaration at: row " + node.def.row + ", column " + node.def.col
                         + ". Initial declaration at: row " + n.def.row + ", column " + n.def.col + ".");
                 return;
             }

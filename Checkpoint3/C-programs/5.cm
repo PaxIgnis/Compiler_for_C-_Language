@@ -1,33 +1,38 @@
-/* 
-* This program shows multiple errors, including testing test conditions for while/if loops and functions calls;
-*/
+/*
+ * This program shows undefined errors.
+ * It shows an error when a function is called that has not been defined.
+ * It shows an error when the assignment types in the undefined function are used.
+ * It shows an error when variables are used that have not been defined.
+ * It shows an error when variables are redefined in the same scope;
+ * It shows an error when functions are defined more than once.
+ */
 
-void output(int fac[]);
 
-void input(void);
-
-void foo(void);
-int xxx[1];
+int gcd(int u, int v) {
+  if (v == 0) return u;
+  else return gcd(v, u/v*v);
+  /* note that u – u/v*v = u mod v */
+}
 
 void main(void) {
-  int x;
-  int yy[8];
-  void yyy;
-  int fac;
-  int y;
-  x = fac = 1 + 2 + y = 3;
-  xxx[input()] = aas = 2;
-  xxx[xxx[xxx[a]]] = 4;
-  xxx[yyy] = yy[1];
-  x = input();
-  fac = 1;
+  int x; int y;
+  x = input(); y = input();
+  output(gcd(x, y));
+}
 
-  while (main()) {
-    fac = fac * x;
-    x = x - 1;
-    fac = fac - yyyy;
+int gcd(int a[], int low, int high) {
+  int i; int x; int k; int test;
+  int test;
+  k = low;
+  x = a[low];
+  x = 1 + j;
+  i = low + 1;
+  while (i < high) {
+    if (a[i] < x) {
+       x = a[i];
+       k = i; 
+    }
+    i = i + 1;
   } 
-
-  output(fac);
-  return 1;
+  return k;
 }

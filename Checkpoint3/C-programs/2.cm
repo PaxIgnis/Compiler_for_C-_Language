@@ -1,38 +1,23 @@
-/*
- * This program shows undefined errors.
- * It shows an error when a function is called that has not been defined.
- * It shows an error when the assignment types in the undefined function are used.
- * It shows an error when variables are used that have not been defined.
- * It shows an error when variables are redefined in the same scope;
- * It shows an error when functions are defined more than once.
+/* An example with the fac provided code, no errors should be here.
+ * It calculates the factorial of the input.
+ * Shows the functionality of:
+ * function and simple declaration,
+ * assignment
+ * call expressions
+ * op expressions (gt, mult, sub)
+ * input/output functions
  */
 
-
-int gcd(int u, int v) {
-  if (v == 0) return u;
-  else return gcd(v, u/v*v);
-  /* note that u – u/v*v = u mod v */
-}
-
 void main(void) {
-  int x; int y;
-  x = input(); y = input();
-  output(gcd(x, y));
-}
+  int x; int fac;
 
-int gcd(int a[], int low, int high) {
-  int i; int x; int k; int test;
-  int test;
-  k = low;
-  x = a[low];
-  x = 1 + j;
-  i = low + 1;
-  while (i < high) {
-    if (a[i] < x) {
-       x = a[i];
-       k = i; 
-    }
-    i = i + 1;
+  x = input();
+  fac = 1;
+
+  while (x > 1) {
+    fac = fac * x;
+    x = x - 1;
   } 
-  return k;
+
+  output(fac);
 }

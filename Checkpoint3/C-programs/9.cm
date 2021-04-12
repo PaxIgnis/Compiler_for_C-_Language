@@ -1,0 +1,20 @@
+/* This program shows that recursive functions work for code generation.
+ * there are no errors in this file.
+ * This file demonstrates functionality for:
+ * input/output functions
+ * assignment
+ * if statements without braces
+ * recursive function calls
+ * imbedded function calls inside of other function calls\
+ */
+int rec(int x) {
+    output(x);
+  if (x == 0) return x;
+  else return rec(x - 1);
+}
+
+void main(void) {
+  int x;
+  x = input();
+  output(rec(x));
+}

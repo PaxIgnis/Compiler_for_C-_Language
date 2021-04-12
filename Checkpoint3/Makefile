@@ -40,6 +40,22 @@ testAST4:
 testAST5:
 	java -cp projects/java-cup-11b.jar:. CM -a C-programs/5.cm
 
+testAST6:
+	java -cp projects/java-cup-11b.jar:. CM -a C-programs/6.cm
+
+testAST7:
+	java -cp projects/java-cup-11b.jar:. CM -a C-programs/7.cm
+
+testAST8:
+	java -cp projects/java-cup-11b.jar:. CM -a C-programs/8.cm
+
+testAST9:
+	java -cp projects/java-cup-11b.jar:. CM -a C-programs/9.cm
+
+testAST0:
+	java -cp projects/java-cup-11b.jar:. CM -a C-programs/0.cm
+
+
 #Test cases for SYMbol table (checkpoint 2)
 testSYM1:
 	java -cp projects/java-cup-11b.jar:. CM -s C-programs/1.cm
@@ -55,6 +71,21 @@ testSYM4:
 
 testSYM5:
 	java -cp projects/java-cup-11b.jar:. CM -s C-programs/5.cm
+
+testSYM6:
+	java -cp projects/java-cup-11b.jar:. CM -s C-programs/6.cm
+
+testSYM7:
+	java -cp projects/java-cup-11b.jar:. CM -s C-programs/7.cm
+
+testSYM8:
+	java -cp projects/java-cup-11b.jar:. CM -s C-programs/8.cm
+
+testSYM9:
+	java -cp projects/java-cup-11b.jar:. CM -s C-programs/9.cm
+
+testSYM0:
+	java -cp projects/java-cup-11b.jar:. CM -s C-programs/0.cm
 
 #Test cases for tm code generation (checkpoint 3)
 testTM1:
@@ -72,5 +103,18 @@ testTM4:
 testTM5:
 	java -cp projects/java-cup-11b.jar:. CM -c C-programs/5.cm
 
-testCodeGen:
-	java -cp projects/java-cup-11b.jar:. CM -c C-programs/codegen.cm
+testTM6:
+	java -cp projects/java-cup-11b.jar:. CM -c C-programs/6.cm
+
+testTM7:
+	java -cp projects/java-cup-11b.jar:. CM -c C-programs/7.cm
+
+testTM8:
+	java -cp projects/java-cup-11b.jar:. CM -c C-programs/8.cm
+
+testTM9:
+	java -cp projects/java-cup-11b.jar:. CM -c C-programs/9.cm
+
+testTM0:
+	java -cp projects/java-cup-11b.jar:. CM -c C-programs/0.cm
+

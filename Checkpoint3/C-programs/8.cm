@@ -1,0 +1,39 @@
+/* 
+* This program shows multiple errors:
+ * undefined variable
+ * void variable
+ * mismatch of types for operands
+ * test condition of loop not an int
+ * mismatched return types
+ * undefined array index
+*/
+
+void output(int fac[]);
+
+void input(void);
+
+void foo(void);
+int xxx[1];
+
+void main(void) {
+  int x;
+  int yy[8];
+  void yyy;
+  int fac;
+  int y;
+  x = fac = 1 + 2 + y = 3;
+  xxx[input()] = aas = 2;
+  xxx[xxx[xxx[a]]] = 4;
+  xxx[yyy] = yy[1];
+  x = input();
+  fac = 1;
+
+  while (main()) {
+    fac = fac * x;
+    x = x - 1;
+    fac = fac - yyyy;
+  } 
+
+  output(fac);
+  return 1;
+}

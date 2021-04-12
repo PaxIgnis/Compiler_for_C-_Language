@@ -1,21 +1,26 @@
-/* 
-* This program shows that array index must be of type int.
-*/
+/* Sample from the gcd code, should have no errors.
+ * It calculates the gcd between 10 and the inputed value.
+ * Shows functionality for:
+ * global variable declarations
+ * multiple functions
+ * recursive function calls
+ * chained op expressions
+ * assignment
+ * input/output functions
+ * if statements
+ * function returns
+ */
 
-void minloc(int a[], int low, int high) {
-  int i; int x; int k;
-  k = low;
-  x = a[low];
-  i = low + 1;
-  k = a[minloc()];
-  x = a[a[a[a[a[1]]]]];
-  
-  while (i < high) {
-    if (a[i] < x) {
-       x = a[i];
-       k = i; 
-    }
-    i = i + 1;
-  } 
-  return;
+int y;
+
+int gcd(int u, int v) {
+  if (v == 0) return u;
+  else return gcd(v, u - u/v*v);
+}
+
+void main(void) {
+  int x;
+  x = input();
+  y = 10;
+  output(gcd(x, y));
 }

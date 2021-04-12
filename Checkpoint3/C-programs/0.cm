@@ -1,0 +1,22 @@
+/* This file demonstrates error checking for return statements.
+ * It will show an error if there is no return for in functions.
+ * It will show an error if there is an empty return for in fucntions.
+ *
+ */
+
+int ret(int x) {
+  output(x);
+  return;
+}
+
+int empty(void) {
+    int z;
+    z = 2;
+}
+
+void main(void) {
+  int x;
+  x = input();
+  output(ret(x));
+  output(empty());
+}

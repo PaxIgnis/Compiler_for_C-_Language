@@ -1,0 +1,106 @@
+Hendrik van der Meijden
+Feb 04, 2021
+CIS4650 W21
+
+Assumptions:
+
+OPENTAG:
+    It is assumed that an opentag starts with '<' and ends with '>', and doesn't contain '>' anywhere
+    between the first and last characters and the second character is not '/'. An empty tag "<>" is allowed.
+    
+CLOSETAG:
+    In accordance with the specifications by the professor, a close tag is only correct if there
+    is no space between the open bracket and the forward slash. Close tags have to start with '<'
+    and end with '>', and cannot contain '>' anywhere inside of the tag. Additionaly, the second
+    character has to be '/', thus all tags have to start with '</'.
+    With this logic the following are matched: "</>", "</startend>", </ end >" but the following are
+    NOT matched "< /end>" "< />".
+
+WORD:
+    It is assumed that words contain atleast one apha character, and may contain numbers.
+    With this logic the following are matched: "asdf", "hello123", "123hello123".
+
+NUMBER:
+    Matches number that are preceded by a '-' or '+' or nothing. Numbers can have a single '.', and it can directly
+    precede or be somewhere between them.
+    This logic matches all of the following: "123", "123.123", ".123", "+123", "-123.123", "-.123".
+    The following are not matched as single numbers: "123x10^3", "123e12", "123,123", "123.".
+    And '123-123' is matched as '123' and '-123'.
+
+APOSTROPHIZED:
+    It is assumed that no apostrophized word will start or end with an apstrophe.
+    It is also assumed that the words with apostrophes will follow the specification for words, i.e. they 
+    can't be soley numbers. However, it is possible that part of the word between apostrophes can be just numbers.
+    With this logic the text: "1'st" WILL be matched but "12'3" will NOT. In accordance with the instructions of 
+    the professor from a post on the Courselink discussion boards, a word with hyphens will only be matched if 
+    there is only one apstrophe, and it appears after the final hyphen. 
+    With this logic the text: "abc-acb'abc" and "1-2-three's" WILL be matched but "1-two's's" will only match "1-two's"
+    and "123'123-123'123" will match as APOSTROPHIZED(123'123),PUNCTUATION(-),APOSTROPHIZED(123'123).
+
+HYPHENATED:
+    It is assumed the no hyphenated word will start or end with a hyphen.
+    It is also assumed that the words being hyphenated will follow the specification for words, i.e. they 
+    can't be soley numbers. However, it is possible that part of the word between hyphens can be just numbers.
+    With this logic the text: "catch-22" and "10-minutes" WILL be matched but "123-123" will NOT. 
+    
+PUNCTUATION:
+    Matches any character that is not an alphanum or whitespace (including line returns).
+
+Other:
+    If stack is empty, then nothing will be printed, there has to be a relevant tag in the stack.
+
+
+Instructions:
+    This directory contains all the required files for building a scanner
+    for the TINY language.
+
+    To build the scanner, type "make" in the current directory, which will 
+    generate a bytecode file called Scanner.class.
+
+    To test source code like "newsdata.txt", type "java Scanner < newsdata.txt" 
+    and the token sequence will be displayed on the screen. Note that both 
+    STDOUT and STDERR will print, so it might be a good idea to direct these streams
+    to seperate like this: "java Scanner < newsdata.txt >out.txt 2>err.txt"
+
+    To rebuild the scanner, type "make clean" and type "make" again.
+
+Possible Improvements:
+    Possibly to improve the hyphenated and apostrophized regex to recognize common user errors.
+
+    Add a more complex number set to recognize numbers such as 123,112 and 13e3.
+
+
+Testing:
+    Tokenization:
+        To test the effectiveness of the tokenization, the program will have
+        to have effective handling of cases where the tokens are empty, when
+        they include just whitespace, when they include only special characters
+        or punctuation, and when they include tag names in different capitalizations.
+        Below are some of the cases and the correct interpretations:
+            <>      empty open tag
+            <<>     an open tag with '<' being the tag name
+            < /?>   an open tag with /? being the tag name
+            <    >  empty open tag
+            < oFf>  an open tag with 'OFF' being the tag name
+            </>     empty close tag
+            </    > empty close tag
+            </<<>   close tag with '<<' being the tag name
+            <////>  close tag with '///' being the tag name
+            </ a b> close tag with 'a' being the tag name
+
+    Validation of Nesting Tags:
+        Validation of nesting the tags in the stack should include the 
+        ability to match close tags to open tags in the stack, along 
+        with the ability to ignore tags that are empty, and not add
+        empty tags to the stack. This also includes the functionality of
+        creating error messages when a close tag does not match the open tag
+        on top of the stack, and the ability to print this bad close tag to
+        std.err along with the line number. This also includes printing out all
+        open tags in the stack at the end of the file.
+
+    Filtering Irrelevent Information:
+        Filtering information from being printed to std.out when it is not right
+        to do so. Open and close tags should not be printed if they are amount the list
+        of relevant tags, and also not if the are nested under any non relevant tags. All other 
+        tags should no be printed if they are nested under non relevant tags or if the 
+        stack is empty.

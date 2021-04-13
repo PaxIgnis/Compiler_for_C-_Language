@@ -1,15 +1,39 @@
 A JFlex+Cup implementation for the Cplus language.
 
-  Note that you need to modify the paths for CLASSPATH, JFLEX, and CUP in 
-the Makefile so that the related commands can be found on your particular 
-machine.  For example, the given settings are for the Linux server and the 
-commented settings are for my macbook.
+Hendrik van der Meijden
+March 8, 2021
 
-  Build instructions are inside the report.
-  To rebuild the parser, type "make clean" and type "make" again.
+Checkpoint 1 Report
 
-  Also note that all the abstract syntax tree structures are defined under
-the directory "absyn" and the methods for showing a syntax tree is implemented
-by the visitor pattern in "ShowTreeVisitor.java".  Since some java files are 
-generated automatically, they may contain variables that are not used, which 
-are safe to ignore in the compilation process.
+Scanner
+
+The scanner is implemented using JFlex. The sample provided for the Tiny language was used and modified for use with the c minus language. The new symbols are sent to the parser along with the row/column numbers. All of the required token types have been implemented.
+
+Grammar Rules (Parser)
+
+The parser grammar was implemented first, followed by a simplification of the grammar by use of CUP’s precedence variables. The automatic shifts that are preferred by cup have also been added to the precedence in order to show the fewest amount of warnings as possible. So no warnings show for things like the dangling if statements because when CUP processes an ambiguous statement it is instructed to use a precedence instead of relying on the default shift, which would produce a warning.
+
+Parser Embedded Code
+
+Embedded code was added after the simplification of the grammar. The types for the non-terminals had to be changed a bit, due to numerous errors of incompatible types. After this was solved the cases for void and empty lists had to be fixed. This was changed to pass the null value to the result, and then to check if a list was null before any operations. The visitor pattern code was modified from the sample provided for the tiny language. The visitor pattern used is the pre-order traversal, which means it starts at the root and works its way down the tree by each level. The tree printed out might be a bit difficult to read, but it is similar to the one used for the tiny language and thus follows the spec. The nodes for the list types do not print out the list type, as stated by Dr. Song on the discussion board. If the user does not print the AST then the program will be parsed without any output if there are no errors.
+
+Error Recovery
+
+Error recovery for simple errors was implemented. There wasn’t a lot of information to go on, so this was done mostly through trial and error. Some of the errors that are recoverable are missing function and variable declaration types, and parameter errors. For the declarations, it is assumed that they are int’s in order to not break the processing.
+
+Assumptions and Limitations and Possible Improvements
+
+• It is assumed that if a file is correctly formatted without any errors it will always produce a correct syntax tree.
+• It is assumed that the program is run on a linux device, if not then the makefile may require some changes.
+• The ‘-a’ flag has been implemented, which means that if a user does not pass this flag, then the AST will not be generated, but the parsing will proceed. If this flag is passed in, then the AST will be created and all of the output from the program will be sent to a file with the same name as the provided file, except the ‘.cm.’ will be replaced with ‘.abs’.
+• It is assumed that all input files will have the suffix ‘.cm’
+• The provided c minus sample files are provided in the folder ‘C-programs’, and the output AST files will also be in this folder.
+•
+
+Building
+
+The program requires jFlex to be installed, and available as a PATH variable. The CUP jar is provided in the submission and does not need to be installed. To make the program just type ‘make’.
+To test the Scanner use: java -cp projects/java-cup-11b.jar:. Scanner < C-programs/gcd.cm
+To test the parser w/o AST: java -cp projects/java-cup-11b.jar:. CM C-programs/gcd.cm
+To test the parser with AST: java -cp projects/java-cup-11b.jar:. CM -a C-programs/gcd.cm
+(the AST will be in a file: C-programs/gcd.abs)
